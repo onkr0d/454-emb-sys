@@ -39,6 +39,7 @@ int main(){
 	lcd_initialize();
 	lcd_clear();
     
+    // Task 1
     // lcd_locate (column, row)
 	lcd_locate(0,0);
 	lcd_printf("Tiger");
@@ -47,8 +48,10 @@ int main(){
     lcd_printf("Ivan");
     
     lcd_locate(0,2);
-    lcd_printf("Tom")
+    lcd_printf("Tom");
 
+    // Task 2
+  
 
 	
 	/* Do nothing */
