@@ -43,7 +43,7 @@
       <compileType>
         <linkerTool>
           <linkerLibItems>
-            <linkerLibFileItem>../../Downloads/CS_454_654_Lab_0/lcd.a</linkerLibFileItem>
+            <linkerLibFileItem>../../../Downloads/CS_454_654_Lab_0/lcd.a</linkerLibFileItem>
           </linkerLibItems>
         </linkerTool>
         <archiverTool>
