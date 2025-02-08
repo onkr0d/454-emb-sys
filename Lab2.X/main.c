@@ -27,48 +27,50 @@
 _FOSCSEL(FNOSC_PRIPLL);
 
 // OSC2 Pin Function: OSC2 is Clock Output - Primary Oscillator Mode: XT Crystal
-_FOSC(OSCIOFNC_OFF & POSCMD_XT); 
+_FOSC(OSCIOFNC_OFF & POSCMD_XT);
 
 // Watchdog Timer Enabled/disabled by user software
 _FWDT(FWDTEN_OFF);
 
 // Disable Code Protection
-_FGS(GCP_OFF);  
+_FGS(GCP_OFF);
 
+unsigned int milliseconds = 0;
 
-int main(){
-	/* LCD Initialization Sequence */
-	__C30_UART=1;	
-	lcd_initialize();
-	lcd_clear();
-    
+int main() {
+    /* LCD Initialization Sequence */
+    __C30_UART = 1;
+    lcd_initialize();
+    lcd_clear();
+
 
     CLEARBIT(LED1_TRIS); // Set Pin to Output
     CLEARBIT(LED2_TRIS); // Set Pin to Output
     CLEARBIT(LED3_TRIS); // Set Pin to Output
     CLEARBIT(LED4_TRIS); // Set Pin to Output
-    
+
     // configuration of joystick registers according to Lab Manual 4.6.2, "Button #1 is located on PORTE PIN8..."
     SETBIT(TRISEbits.TRISE8);
     SETBIT(INTCON2bits.INT1EP);
     SETBIT(AD1PCFGHbits.PCFG20);
-    
+
+    // legacy code copied from lab 1
     unsigned int buttonCount = 0;
     unsigned int holdBuffer = 0;
     unsigned int alreadyPressed = 0;
-    
-//  Timer 2 code
-    CLEARBIT( T2CONbits.TON ) ;
+
+    //  Timer 2 code
+    CLEARBIT(T2CONbits.TON);
     CLEARBIT(T2CONbits.TCS);
-    CLEARBIT( T2CONbits.TGATE);
+    CLEARBIT(T2CONbits.TGATE);
     TMR2 = 0;
-    T2CONbits.TCKPS = 0b11;
-    CLEARBIT(IFS0bits.T2IF) ;
-    CLEARBIT( IEC0bits.T2IE);
-    PR2 = 16000 ; 
+    T2CONbits.TCKPS = 0b11; //256
+    CLEARBIT(IFS0bits.T2IF);
+    CLEARBIT(IEC0bits.T2IE);
+    PR2 = 50 - 1; // 1*10^-3 * 12.8*10^6 * 1/256
     SETBIT(T2CONbits.TON);
-    SETBIT( IEC0bits.T2IE);
-   
+    SETBIT(IEC0bits.T2IE);
+
     // Timer 1 code
     //enable LPOSCEN
     __builtin_write_OSCCONL(OSCCONL | 2);
@@ -80,64 +82,73 @@ int main(){
     PR1 = 32767; //Load the period value
     IPC0bits.T1IP = 0x01; // Set Timer1 Interrupt Priority Level
     IFS0bits.T1IF = 0; // Clear Timer1 Interrupt Flag
-    IEC0bits.T1IE = 1;// Enable Timer1 interrupt
-    T1CONbits.TON = 1;// Start Timer
-    
-      
-      
+    IEC0bits.T1IE = 1; // Enable Timer1 interrupt
+    T1CONbits.TON = 1; // Start Timer
+
+
+
     int flip0 = 0;
     while (1) {
-  
         flip0 = 1 - flip0;
-        if( flip0 ) {
-            SETLED( LED4_PORT );
+        if (flip0) {
+            SETLED(LED4_PORT);
             Nop();
-            __delay_ms(300); 
-            }
-        else {
+            __delay_ms(300);
+        } else {
             CLEARLED(LED4_PORT);
             Nop();
-            __delay_ms(300); 
+            __delay_ms(300);
         }
+        
+        // print time here.
+        lcd_locate(0,0);
+        lcd_printf("%d:%d:%d", (milliseconds / (1000 * 60)) , (milliseconds / 1000) % 60, milliseconds % 1000);
+        // locate again because jank
+        lcd_locate(0,0);
     }
-    
-    
+
+
     return 0;
 }
 
 int flip2 = 0;
+int count2 = 0;
 
-void __attribute__(( __interrupt__ )) _T2Interrupt(void)
-{
-    flip2 = 1 - flip2;
-    if( flip2 ) {
-        SETLED( LED1_PORT );
-        Nop();
+/**
+ * Timer2 interrupt
+ */
+void __attribute__((__interrupt__)) _T2Interrupt(void) {
+    milliseconds++;
+    if (5 - 1 == count2++) {
+        count2 = 0;
+
+        flip2 = 1 - flip2;
+        if (flip2) {
+            SETLED(LED1_PORT);
+            Nop();
+        } else {
+            CLEARLED(LED1_PORT);
+            Nop();
         }
-    else {
+    }
+    CLEARBIT(IFS0bits.T2IF);
 
-        CLEARLED(LED1_PORT);
-        Nop();
-    }    
- CLEARBIT(IFS0bits.T2IF) ;
-    
-    
+
 }
 
 int flip1 = 0;
-void __attribute__(( __interrupt__ )) _T1Interrupt(void)
-{
+/**
+ * Timer1 interrupt
+ */
+void __attribute__((__interrupt__)) _T1Interrupt(void) {
     flip1 = 1 - flip1;
-    if( flip1) {
-        SETLED( LED2_PORT );
+    if (flip1) {
+        SETLED(LED2_PORT);
         Nop();
-        }
-    else {
+    } else {
 
         CLEARLED(LED2_PORT);
         Nop();
-    }    
- CLEARBIT(IFS0bits.T1IF) ;
-    
-    
+    }
+    CLEARBIT(IFS0bits.T1IF);
 }
