@@ -50,9 +50,16 @@ int main() {
     CLEARBIT(LED4_TRIS); // Set Pin to Output
 
     // configuration of joystick registers according to Lab Manual 4.6.2, "Button #1 is located on PORTE PIN8..."
+
+    IEC1bits.INT1IE = 0; // Disable Timer1 interrupt
+
+    
     SETBIT(TRISEbits.TRISE8);
     SETBIT(INTCON2bits.INT1EP);
     SETBIT(AD1PCFGHbits.PCFG20);
+    
+    INTCON2bits.INT1EP = 0; // Trigger on falling edge
+    IEC1bits.INT1IE = 1; // Enable Timer1 interrupt
 
     // legacy code copied from lab 1
     unsigned int buttonCount = 0;
@@ -93,7 +100,7 @@ int main() {
         if (flip0) {
             SETLED(LED4_PORT);
             Nop();
-            __delay_ms(300);
+            __delay_ms(700);
         } else {
             CLEARLED(LED4_PORT);
             Nop();
@@ -151,4 +158,14 @@ void __attribute__((__interrupt__)) _T1Interrupt(void) {
         Nop();
     }
     CLEARBIT(IFS0bits.T1IF);
+}
+
+/**
+ * Copy of Timer1 interrupt
+ */
+void __attribute__((__interrupt__)) _INT1Interrupt(void) {
+
+    milliseconds = 0;
+    
+    CLEARBIT(IFS1bits.INT1IF);
 }
