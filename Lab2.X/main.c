@@ -93,18 +93,47 @@ int main() {
     T1CONbits.TON = 1; // Start Timer
 
 
+        //  Timer 3 code
+    CLEARBIT(T3CONbits.TON);
+    CLEARBIT(T3CONbits.TCS);
+    CLEARBIT(T3CONbits.TGATE);
+    TMR3 = 0;
+    T3CONbits.TCKPS = 0b11; // clock / 1
+    CLEARBIT(IFS0bits.T3IF);
+    CLEARBIT(IEC0bits.T3IE);
+    PR3 = 0; // free run 
+    SETBIT(T3CONbits.TON);
+    
+    /* SETBIT(IEC0bits.T3IE); */
+    
 
-    int flip0 = 0;
+    unsigned short newtime, oldtime, clk_timespan;
+    float ms_timespan;
+    
+    int flip0 = 0, flip3 = 0;
+    
     while (1) {
+ 
+         // time main loop   
+
+         clk_timespan = ( newtime = TMR3 ) - oldtime;
+         ms_timespan = clk_timespan / ( (double) 12800 ); // Divided by clock cycle speed 12.8Mhz
+         oldtime = newtime;
+         
+         lcd_locate(0,1);
+         lcd_printf( "%hx   ", oldtime /*  , ms_timespan   */   );
+         lcd_locate(0,1);
+            
+            
         flip0 = 1 - flip0;
         if (flip0) {
             SETLED(LED4_PORT);
             Nop();
-            __delay_ms(700);
+ 
         } else {
             CLEARLED(LED4_PORT);
             Nop();
-            __delay_ms(300);
+
         }
         
         // print time here.
@@ -142,6 +171,29 @@ void __attribute__((__interrupt__)) _T2Interrupt(void) {
 
 
 }
+
+/**
+ * Timer 3 interrupt
+ */
+
+int T3toggle = 0;
+
+void __attribute__((__interrupt__)) _T3Interrupt(void) {
+ 
+        if ( T3toggle = 1 - T3toggle ) {
+            SETLED(LED3_PORT);
+            Nop();
+        } else {
+            CLEARLED(LED3_PORT);
+            Nop();
+        }
+
+    CLEARBIT(IFS0bits.T3IF);
+}
+
+
+
+
 
 int flip1 = 0;
 /**
