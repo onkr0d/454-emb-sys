@@ -62,7 +62,7 @@ int main() {
     CLEARBIT(T2CONbits.TCS);
     CLEARBIT(T2CONbits.TGATE);
     TMR2 = 0;
-    T2CONbits.TCKPS = 0b11; //256
+    T2CONbits.TCKPS = 0b11; // 1:256 prescaler
     CLEARBIT(IFS0bits.T2IF);
     CLEARBIT(IEC0bits.T2IE);
     PR2 = 50 - 1; // 1*10^-3 * 12.8*10^6 * 1/256
@@ -84,7 +84,7 @@ int main() {
     T1CONbits.TON = 1; // Start Timer
 
 
-    // Timer 3 code
+    // Timer 3 initialize
     CLEARBIT(T3CONbits.TON);
     CLEARBIT(T3CONbits.TCS);
     CLEARBIT(T3CONbits.TGATE);
@@ -99,25 +99,25 @@ int main() {
 
     // task 4
     unsigned int iters = 0;
-
-
+    int flip0 = 0, flip3 = 0;
+    
     uint16_t newtime = 0, oldtime = 0, clk_cycles;
     double ms_time;
-
-    int flip0 = 0, flip3 = 0;
 
     while (1) {
         // task 4 printing
         if (iters++ == 25000) {
-            // reset iterations
             iters = 0;
             lcd_locate(0, 0);
+            
             // FIXED very funny edge cases:
             // 1. when minutes > 0, and 0 < seconds < 10, the ms timer displays 4 spaces, ie, xxxx, instead of xxx
             // 2. after you reset it with the trigger (and seconds > 10) , the above case changes to minutes >= 0. 
             // how is this possible? there should be no possible values > 1000, seeing as we mod % 1000.
             // only god knows.
-            lcd_printf("since: %02lu:%02lu.%03lu",
+            // (Tiger: what the hell is this bro ?)
+            
+            lcd_printf("Last reset: %02lu:%02lu.%03lu",
                     (milliseconds / (1000UL * 60UL)),
                     (milliseconds / 1000UL) % 60,
                     milliseconds % 1000UL);
@@ -126,24 +126,13 @@ int main() {
             lcd_printf("cycles: %d  %.3f", clk_cycles, ms_time)
             lcd_locate(0, 1);
         }
-        // time main loop
 
         newtime = TMR3;
         clk_cycles = newtime - oldtime;
         ms_time = (float) clk_cycles / 1600;
-
-
-        /*        
-        lcd_locate(0, 1);
-        lcd_printf("%hx %2.4f", clk_cycles, ms_time);
-        lcd_printf("%d  ", clk_cycles);
-        lcd_locate(0, 2);
-        lcd_printf("%d  \n", 4);
-        lcd_locate(0, 1);
-         */
-        
         oldtime = newtime;
 
+        // Toggling flip0 bit, also toggles LED4 on/off
         flip0 = 1 - flip0;
         if (flip0) {
             SETLED(LED4_PORT);
@@ -159,17 +148,16 @@ int main() {
     return 0;
 }
 
-int flip2 = 0;
-int count2 = 0;
 
 /**
  * Timer2 interrupt
  */
+int flip2 = 0;
+int count2 = 0;
 void __attribute__((__interrupt__)) _T2Interrupt(void) {
     milliseconds++;
     if (5 - 1 == count2++) {
         count2 = 0;
-
         flip2 = 1 - flip2;
         if (flip2) {
             SETLED(LED1_PORT);
@@ -185,7 +173,7 @@ void __attribute__((__interrupt__)) _T2Interrupt(void) {
 }
 
 /**
- * Timer 3 interrupt
+ * Timer 3 interrupt handler
  */
 /**/
 int T3toggle = 0;
@@ -203,14 +191,10 @@ void __attribute__((__interrupt__)) _T3Interrupt(void) {
 }
 
 
-
-
-
-int flip1 = 0;
-
 /**
- * Timer1 interrupt
+ * Timer1 interrupt handler
  */
+int flip1 = 0;
 void __attribute__((__interrupt__)) _T1Interrupt(void) {
     flip1 = 1 - flip1;
     if (flip1) {
@@ -225,7 +209,7 @@ void __attribute__((__interrupt__)) _T1Interrupt(void) {
 }
 
 /**
- * Copy of Timer1 interrupt
+ * Copy of Timer1 interrupt handler, for testing
  */
 void __attribute__((__interrupt__)) _INT1Interrupt(void) {
 
