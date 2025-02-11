@@ -114,7 +114,7 @@ int main() {
             lcd_locate(0, 0);
             // FIXED very funny edge cases:
             // 1. when minutes > 0, and 0 < seconds < 10, the ms timer displays 4 spaces, ie, xxxx, instead of xxx
-            // 2. after you reset it with the trigger (and seconds > 10) , the above case changes to minutes >= 0. 
+            // 2. after you reset it with the trigger (and seconds > 10), the above case changes to minutes >= 0. 
             // how is this possible? there should be no possible values > 1000, seeing as we mod % 1000.
             // only god knows.
             lcd_printf("since: %02lu:%02lu.%03lu",
