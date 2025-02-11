@@ -214,11 +214,11 @@ Default Scalar Model: Small
 section                    address   length (PC units)   length (bytes) (dec)
 -------                    -------   -----------------   --------------------
 .text                        0x200              0x1ed8          0x2e44  (11844)
-.const                      0x20d8                0x2a            0x3f  (63)
-.text                       0x2102               0x4d6           0x741  (1857)
-.dinit                      0x25d8               0x10c           0x192  (402)
+.const                      0x20d8                0x30            0x48  (72)
+.text                       0x2108               0x4d6           0x741  (1857)
+.dinit                      0x25de               0x10c           0x192  (402)
 
-                 Total "program" memory used (bytes):         0x3756  (14166) 5%
+                 Total "program" memory used (bytes):         0x375f  (14175) 5%
 
 
 "data" Memory  [Origin = 0x800, Length = 0x7800]
@@ -368,32 +368,32 @@ External Symbols in Program Memory (by address):
                   0x001ee8                  _OpenUART1
                   0x001ef0                  ___muldf3
                   0x001fdc                  ___adddf3
-                  0x002102                  _lcd_initialize
-                  0x002116                  _lcd_send
-                  0x00213a                  _lcd_send_str
-                  0x00215e                  _lcd_send_cmd
-                  0x00216e                  _clearLCD
-                  0x00217c                  _setDebug
-                  0x002190                  _backLight
-                  0x0021a4                  _drawCircle
-                  0x0021ca                  _toggleCRLF
-                  0x0021d8                  _eraseBlock
-                  0x0021fe                  _resetLCD
-                  0x00220c                  _changeBaud
-                  0x002232                  _toggleFont
-                  0x002240                  _setFontMode
-                  0x002254                  _drawSprite
-                  0x00227a                  _drawLine
-                  0x0022a6                  _uploadSprite
-                  0x0022e2                  _drawBox
-                  0x00230e                  _togglePixel
-                  0x002370                  _drawFilledBox
-                  0x00239c                  _reverseColor
-                  0x0023aa                  _toggleSplash
-                  0x0023b8                  _drawData
-                  0x002412                  _gotoPosition
-                  0x002434                  _gotoLine
-                  0x002460                  _main
+                  0x002108                  _lcd_initialize
+                  0x00211c                  _lcd_send
+                  0x002140                  _lcd_send_str
+                  0x002164                  _lcd_send_cmd
+                  0x002174                  _clearLCD
+                  0x002182                  _setDebug
+                  0x002196                  _backLight
+                  0x0021aa                  _drawCircle
+                  0x0021d0                  _toggleCRLF
+                  0x0021de                  _eraseBlock
+                  0x002204                  _resetLCD
+                  0x002212                  _changeBaud
+                  0x002238                  _toggleFont
+                  0x002246                  _setFontMode
+                  0x00225a                  _drawSprite
+                  0x002280                  _drawLine
+                  0x0022ac                  _uploadSprite
+                  0x0022e8                  _drawBox
+                  0x002314                  _togglePixel
+                  0x002376                  _drawFilledBox
+                  0x0023a2                  _reverseColor
+                  0x0023b0                  _toggleSplash
+                  0x0023be                  _drawData
+                  0x002418                  _gotoPosition
+                  0x00243a                  _gotoLine
+                  0x002466                  _main
                   0xf80004                  __FGS.sec
 
 External Symbols in Program Memory (by name):
@@ -471,42 +471,42 @@ External Symbols in Program Memory (by name):
                   0x0003d0                  __printf_cdfFnopuxX
                   0x000230                  __psv_init
                   0x000200                  __resetPRI
-                  0x002190                  _backLight
-                  0x00220c                  _changeBaud
-                  0x00216e                  _clearLCD
+                  0x002196                  _backLight
+                  0x002212                  _changeBaud
+                  0x002174                  _clearLCD
                   0x001660                  _div
-                  0x0022e2                  _drawBox
-                  0x0021a4                  _drawCircle
-                  0x0023b8                  _drawData
-                  0x002370                  _drawFilledBox
-                  0x00227a                  _drawLine
-                  0x002254                  _drawSprite
+                  0x0022e8                  _drawBox
+                  0x0021aa                  _drawCircle
+                  0x0023be                  _drawData
+                  0x002376                  _drawFilledBox
+                  0x002280                  _drawLine
+                  0x00225a                  _drawSprite
                   0x00074c                  _efwrite
-                  0x0021d8                  _eraseBlock
+                  0x0021de                  _eraseBlock
                   0x000d6a                  _fclose
                   0x0012c6                  _free
                   0x000456                  _fwrite
-                  0x002434                  _gotoLine
-                  0x002412                  _gotoPosition
-                  0x002102                  _lcd_initialize
-                  0x002116                  _lcd_send
-                  0x00215e                  _lcd_send_cmd
-                  0x00213a                  _lcd_send_str
+                  0x00243a                  _gotoLine
+                  0x002418                  _gotoPosition
+                  0x002108                  _lcd_initialize
+                  0x00211c                  _lcd_send
+                  0x002164                  _lcd_send_cmd
+                  0x002140                  _lcd_send_str
                   0x001396                  _ldiv
-                  0x002460                  _main
+                  0x002466                  _main
                   0x000d00                  _malloc
                   0x00072a                  _memchr
                   0x00073e                  _memcpy
-                  0x0021fe                  _resetLCD
-                  0x00239c                  _reverseColor
-                  0x00217c                  _setDebug
-                  0x002240                  _setFontMode
+                  0x002204                  _resetLCD
+                  0x0023a2                  _reverseColor
+                  0x002182                  _setDebug
+                  0x002246                  _setFontMode
                   0x000828                  _strchr
-                  0x0021ca                  _toggleCRLF
-                  0x002232                  _toggleFont
-                  0x00230e                  _togglePixel
-                  0x0023aa                  _toggleSplash
-                  0x0022a6                  _uploadSprite
+                  0x0021d0                  _toggleCRLF
+                  0x002238                  _toggleFont
+                  0x002314                  _togglePixel
+                  0x0023b0                  _toggleSplash
+                  0x0022ac                  _uploadSprite
                   0x000dee                  fclose.XX_o:_closeall
                   0x0003b4                  printf_cdfFnopuxX.XXo:_prout
                   0x0004fe                  xprintf_cdfFnopuxX.XXo:_eprout
@@ -748,7 +748,7 @@ __FSS
 
 __FGS             0xf80004          0x2
  *(__FGS.sec*)
- __FGS.sec        0xf80004          0x2 /CW/_FGSÐÎP
+ __FGS.sec        0xf80004          0x2 /CW/_FGSÐ
                   0xf80004                  _FGS.sec
 
 __FOSCSEL         0xf80006          0x2
@@ -2117,7 +2117,7 @@ LOAD /opt/microchip/xc16/v1.70/bin/bin/../../lib/libm-coff.a
 LOAD /opt/microchip/xc16/v1.70/bin/bin/../../lib/liblega-c-coff.a
 END GROUP
 OUTPUT(dist/default/production/Lab2.X.production.cof coff-pic30)
-LOAD /CW/_FGSÐÎP
+LOAD /CW/_FGSÐ
 LOAD jump_table
 LOAD data_init
 LOAD default_isr
@@ -2323,38 +2323,38 @@ __c30_signature
  .ivt._INT1Interrupt
                   0x00003c          0x2 build/default/production/main.o
 
-.const              0xa0d8         0x2a load address 0x0020d8  
- .const             0xa0d8         0x2a build/default/production/main.o
+.const              0xa0d8         0x30 load address 0x0020d8  
+ .const             0xa0d8         0x30 build/default/production/main.o
 
-.text             0x002102        0x4d6
- .text            0x002102        0x35e ../All_headers_misc/lcd.a(lcd.o)
-                  0x002102                  lcd_initialize
-                  0x002116                  lcd_send
-                  0x00213a                  lcd_send_str
-                  0x00215e                  lcd_send_cmd
-                  0x00216e                  clearLCD
-                  0x00217c                  setDebug
-                  0x002190                  backLight
-                  0x0021a4                  drawCircle
-                  0x0021ca                  toggleCRLF
-                  0x0021d8                  eraseBlock
-                  0x0021fe                  resetLCD
-                  0x00220c                  changeBaud
-                  0x002232                  toggleFont
-                  0x002240                  setFontMode
-                  0x002254                  drawSprite
-                  0x00227a                  drawLine
-                  0x0022a6                  uploadSprite
-                  0x0022e2                  drawBox
-                  0x00230e                  togglePixel
-                  0x002370                  drawFilledBox
-                  0x00239c                  reverseColor
-                  0x0023aa                  toggleSplash
-                  0x0023b8                  drawData
-                  0x002412                  gotoPosition
-                  0x002434                  gotoLine
- .text            0x002460        0x178 build/default/production/main.o
-                  0x002460                  main
+.text             0x002108        0x4d6
+ .text            0x002108        0x35e ../All_headers_misc/lcd.a(lcd.o)
+                  0x002108                  lcd_initialize
+                  0x00211c                  lcd_send
+                  0x002140                  lcd_send_str
+                  0x002164                  lcd_send_cmd
+                  0x002174                  clearLCD
+                  0x002182                  setDebug
+                  0x002196                  backLight
+                  0x0021aa                  drawCircle
+                  0x0021d0                  toggleCRLF
+                  0x0021de                  eraseBlock
+                  0x002204                  resetLCD
+                  0x002212                  changeBaud
+                  0x002238                  toggleFont
+                  0x002246                  setFontMode
+                  0x00225a                  drawSprite
+                  0x002280                  drawLine
+                  0x0022ac                  uploadSprite
+                  0x0022e8                  drawBox
+                  0x002314                  togglePixel
+                  0x002376                  drawFilledBox
+                  0x0023a2                  reverseColor
+                  0x0023b0                  toggleSplash
+                  0x0023be                  drawData
+                  0x002418                  gotoPosition
+                  0x00243a                  gotoLine
+ .text            0x002466        0x178 build/default/production/main.o
+                  0x002466                  main
 
-.dinit            0x0025d8        0x10c
- .dinit           0x0025d8        0x10c data_init
+.dinit            0x0025de        0x10c
+ .dinit           0x0025de        0x10c data_init
