@@ -11,7 +11,7 @@
 
 #include <p33Fxxxx.h>
 //do not change the order of the following 3 definitions
-#define FCY 12800000UL 
+#define FCY 12800000UL
 #include <stdio.h>
 #include <libpic30.h>
 #include <uart.h>
@@ -35,7 +35,7 @@ _FWDT(FWDTEN_OFF);
 // Disable Code Protection
 _FGS(GCP_OFF);
 
-unsigned int milliseconds = 0;
+unsigned long milliseconds = 0;
 
 int main() {
     /* LCD Initialization Sequence */
@@ -92,7 +92,7 @@ int main() {
     T3CONbits.TCKPS = 0b01; // Prescaler
     CLEARBIT(IFS0bits.T3IF);
     CLEARBIT(IEC0bits.T3IE);
-    PR3 = 0; // free run 
+    PR3 = 0; // free run
     SETBIT(T3CONbits.TON);
 
     /* SETBIT(IEC0bits.T3IE); */
@@ -101,21 +101,30 @@ int main() {
     unsigned int iters = 0;
 
 
-    uint16_t newtime = 0, oldtime = 0 , clk_cycles;
+    uint16_t newtime = 0, oldtime = 0, clk_cycles;
     double ms_time;
 
     int flip0 = 0, flip3 = 0;
 
     while (1) {
+        // task 4 printing
         if (iters++ == 25000) {
-            // task 4 printing
+            // reset iterations
             iters = 0;
             lcd_locate(0, 0);
-            lcd_printf("%d:%d.%d", (milliseconds / (1000 * 60)), (milliseconds / 1000) % 60, milliseconds % 1000);
+            // FIXED very funny edge cases:
+            // 1. when minutes > 0, and 0 < seconds < 10, the ms timer displays 4 spaces, ie, xxxx, instead of xxx
+            // 2. after you reset it with the trigger (and seconds > 10) , the above case changes to minutes >= 0. 
+            // how is this possible? there should be no possible values > 1000, seeing as we mod % 1000.
+            // only god knows.
+            lcd_printf("since: %02lu:%02lu.%03lu",
+                    (milliseconds / (1000UL * 60UL)),
+                    (milliseconds / 1000UL) % 60,
+                    milliseconds % 1000UL);
             // locate again because jank
             lcd_locate(0, 1);
-            lcd_printf("  %d  %.3f  ",  clk_cycles , ms_time )
-            lcd_locate(0, 0);
+            lcd_printf("cycles: %d  %.3f", clk_cycles, ms_time)
+            lcd_locate(0, 1);
         }
         // time main loop
 
@@ -123,14 +132,17 @@ int main() {
         clk_cycles = newtime - oldtime;
         ms_time = (float) clk_cycles / 1600;
 
-        /*       lcd_locate( 0 , 1 ); 
-            lcd_printf( "%hx %2.4f"  ,clk_cycles , ms_time ) ;
-              lcd_printf(  "%d  " , clk_cycles ) ;
-                       lcd_locate(0,2);
-               lcd_printf(  "%d  \n" , 4 ) ; 
-               lcd_locate(0,1); */
-               oldtime = newtime;
 
+        /*        
+        lcd_locate(0, 1);
+        lcd_printf("%hx %2.4f", clk_cycles, ms_time);
+        lcd_printf("%d  ", clk_cycles);
+        lcd_locate(0, 2);
+        lcd_printf("%d  \n", 4);
+        lcd_locate(0, 1);
+         */
+        
+        oldtime = newtime;
 
         flip0 = 1 - flip0;
         if (flip0) {
@@ -142,15 +154,7 @@ int main() {
             Nop();
 
         }
-
-
-        // print time here.
-        //        lcd_locate(0,0);
-        //        lcd_printf("%d:%d:%d", (milliseconds / (1000 * 60)) , (milliseconds / 1000) % 60, milliseconds % 1000);
-        //        // locate again because jank
-        //        lcd_locate(0,0);
     }
-
 
     return 0;
 }
