@@ -50,23 +50,14 @@ int main() {
     CLEARBIT(LED4_TRIS); // Set Pin to Output
 
     // configuration of joystick registers according to Lab Manual 4.6.2, "Button #1 is located on PORTE PIN8..."
-
     IEC1bits.INT1IE = 0; // Disable Timer1 interrupt
-
-    
     SETBIT(TRISEbits.TRISE8);
     SETBIT(INTCON2bits.INT1EP);
     SETBIT(AD1PCFGHbits.PCFG20);
-    
     INTCON2bits.INT1EP = 0; // Trigger on falling edge
     IEC1bits.INT1IE = 1; // Enable Timer1 interrupt
 
-    // legacy code copied from lab 1
-    unsigned int buttonCount = 0;
-    unsigned int holdBuffer = 0;
-    unsigned int alreadyPressed = 0;
-
-    //  Timer 2 code
+    // Timer 2
     CLEARBIT(T2CONbits.TON);
     CLEARBIT(T2CONbits.TCS);
     CLEARBIT(T2CONbits.TGATE);
@@ -78,7 +69,7 @@ int main() {
     SETBIT(T2CONbits.TON);
     SETBIT(IEC0bits.T2IE);
 
-    // Timer 1 code
+    // Timer 1
     //enable LPOSCEN
     __builtin_write_OSCCONL(OSCCONL | 2);
     T1CONbits.TON = 0; //Disable Timer
@@ -93,54 +84,71 @@ int main() {
     T1CONbits.TON = 1; // Start Timer
 
 
-        //  Timer 3 code
+    // Timer 3 code
     CLEARBIT(T3CONbits.TON);
     CLEARBIT(T3CONbits.TCS);
     CLEARBIT(T3CONbits.TGATE);
-    TMR3 = 0;
-    T3CONbits.TCKPS = 0b11; // clock / 1
+    TMR3 = 0x00;
+    T3CONbits.TCKPS = 0b01; // Prescaler
     CLEARBIT(IFS0bits.T3IF);
     CLEARBIT(IEC0bits.T3IE);
     PR3 = 0; // free run 
     SETBIT(T3CONbits.TON);
-    
+
     /* SETBIT(IEC0bits.T3IE); */
-    
 
-    unsigned short newtime, oldtime, clk_timespan;
-    float ms_timespan;
-    
+    // task 4
+    unsigned int iters = 0;
+
+
+    uint16_t newtime = 0, oldtime = 0 , clk_cycles;
+    double ms_time;
+
     int flip0 = 0, flip3 = 0;
-    
-    while (1) {
- 
-         // time main loop   
 
-         clk_timespan = ( newtime = TMR3 ) - oldtime;
-         ms_timespan = clk_timespan / ( (double) 12800 ); // Divided by clock cycle speed 12.8Mhz
-         oldtime = newtime;
-         
-         lcd_locate(0,1);
-         lcd_printf( "%hx   ", oldtime /*  , ms_timespan   */   );
-         lcd_locate(0,1);
-            
-            
+    while (1) {
+        if (iters++ == 25000) {
+            // task 4 printing
+            iters = 0;
+            lcd_locate(0, 0);
+            lcd_printf("%d:%d.%d", (milliseconds / (1000 * 60)), (milliseconds / 1000) % 60, milliseconds % 1000);
+            // locate again because jank
+            lcd_locate(0, 1);
+            lcd_printf("  %d  %.3f  ",  clk_cycles , ms_time )
+            lcd_locate(0, 0);
+        }
+        // time main loop
+
+        newtime = TMR3;
+        clk_cycles = newtime - oldtime;
+        ms_time = (float) clk_cycles / 1600;
+
+        /*       lcd_locate( 0 , 1 ); 
+            lcd_printf( "%hx %2.4f"  ,clk_cycles , ms_time ) ;
+              lcd_printf(  "%d  " , clk_cycles ) ;
+                       lcd_locate(0,2);
+               lcd_printf(  "%d  \n" , 4 ) ; 
+               lcd_locate(0,1); */
+               oldtime = newtime;
+
+
         flip0 = 1 - flip0;
         if (flip0) {
             SETLED(LED4_PORT);
             Nop();
- 
+
         } else {
             CLEARLED(LED4_PORT);
             Nop();
 
         }
-        
+
+
         // print time here.
-        lcd_locate(0,0);
-        lcd_printf("%d:%d:%d", (milliseconds / (1000 * 60)) , (milliseconds / 1000) % 60, milliseconds % 1000);
-        // locate again because jank
-        lcd_locate(0,0);
+        //        lcd_locate(0,0);
+        //        lcd_printf("%d:%d:%d", (milliseconds / (1000 * 60)) , (milliseconds / 1000) % 60, milliseconds % 1000);
+        //        // locate again because jank
+        //        lcd_locate(0,0);
     }
 
 
@@ -175,18 +183,17 @@ void __attribute__((__interrupt__)) _T2Interrupt(void) {
 /**
  * Timer 3 interrupt
  */
-
+/**/
 int T3toggle = 0;
 
 void __attribute__((__interrupt__)) _T3Interrupt(void) {
- 
-        if ( T3toggle = 1 - T3toggle ) {
-            SETLED(LED3_PORT);
-            Nop();
-        } else {
-            CLEARLED(LED3_PORT);
-            Nop();
-        }
+    if (T3toggle = 1 - T3toggle) {
+        SETLED(LED3_PORT);
+        Nop();
+    } else {
+        CLEARLED(LED3_PORT);
+        Nop();
+    }
 
     CLEARBIT(IFS0bits.T3IF);
 }
@@ -196,6 +203,7 @@ void __attribute__((__interrupt__)) _T3Interrupt(void) {
 
 
 int flip1 = 0;
+
 /**
  * Timer1 interrupt
  */
@@ -218,6 +226,6 @@ void __attribute__((__interrupt__)) _T1Interrupt(void) {
 void __attribute__((__interrupt__)) _INT1Interrupt(void) {
 
     milliseconds = 0;
-    
+
     CLEARBIT(IFS1bits.INT1IF);
 }
