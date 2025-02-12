@@ -64,10 +64,9 @@ int main() {
     TMR2 = 0;
     T2CONbits.TCKPS = 0b11; // 1:256 prescaler
     CLEARBIT(IFS0bits.T2IF);
-    CLEARBIT(IEC0bits.T2IE);
+    SETBIT(IEC0bits.T2IE);
     PR2 = 50 - 1; // 1*10^-3 * 12.8*10^6 * 1/256
     SETBIT(T2CONbits.TON);
-    SETBIT(IEC0bits.T2IE);
 
     // Timer 1
     //enable LPOSCEN
@@ -89,10 +88,10 @@ int main() {
     CLEARBIT(T3CONbits.TCS);
     CLEARBIT(T3CONbits.TGATE);
     TMR3 = 0x00;
-    T3CONbits.TCKPS = 0b01; // Prescaler,
+    T3CONbits.TCKPS = 0b00; // Prescaler,
     CLEARBIT(IFS0bits.T3IF);
     CLEARBIT(IEC0bits.T3IE);
-    PR3 = 0; // free run
+    PR3 = 0xFFFF; // free run
     SETBIT(T3CONbits.TON);
 
     /* SETBIT(IEC0bits.T3IE); */
@@ -106,7 +105,7 @@ int main() {
 
     while (1) {
         // task 4 printing
-        if (iters++ == 25000) {
+        if (iters++ >= 25000) {
             iters = 0;
             lcd_locate(0, 0);
             
@@ -123,13 +122,13 @@ int main() {
                     milliseconds % 1000UL);
             // locate again because jank
             lcd_locate(0, 1);
-            lcd_printf("cycles: %d  %.3f", clk_cycles, ms_time)
+            lcd_printf("cycles: %d  %.3f", clk_cycles, ms_time);
             lcd_locate(0, 1);
         }
 
         newtime = TMR3;
         clk_cycles = newtime - oldtime;
-        ms_time = (float) clk_cycles / 1600;
+        ms_time = (float) clk_cycles * (0.078125f / 1000.0f);
         oldtime = newtime;
 
         // Toggling flip0 bit, also toggles LED4 on/off
@@ -137,11 +136,9 @@ int main() {
         if (flip0) {
             SETLED(LED4_PORT);
             Nop();
-
         } else {
             CLEARLED(LED4_PORT);
             Nop();
-
         }
     }
 
@@ -168,8 +165,6 @@ void __attribute__((__interrupt__)) _T2Interrupt(void) {
         }
     }
     CLEARBIT(IFS0bits.T2IF);
-
-
 }
 
 /**
