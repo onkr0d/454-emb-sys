@@ -748,7 +748,7 @@ __FSS
 
 __FGS             0xf80004          0x2
  *(__FGS.sec*)
- __FGS.sec        0xf80004          0x2 /CW/_FGSÐ
+ __FGS.sec        0xf80004          0x2 /CW/_FGSÐî¢
                   0xf80004                  _FGS.sec
 
 __FOSCSEL         0xf80006          0x2
@@ -2117,7 +2117,7 @@ LOAD /opt/microchip/xc16/v1.70/bin/bin/../../lib/libm-coff.a
 LOAD /opt/microchip/xc16/v1.70/bin/bin/../../lib/liblega-c-coff.a
 END GROUP
 OUTPUT(dist/default/production/Lab2.X.production.cof coff-pic30)
-LOAD /CW/_FGSÐ
+LOAD /CW/_FGSÐî¢
 LOAD jump_table
 LOAD data_init
 LOAD default_isr
