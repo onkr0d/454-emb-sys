@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project>
+  <executable name="dist/default/debug/Lab2.X.debug.cof">
+    <memory name="data">
+      <units>bytes</units>
+      <length>30720</length>
+      <used>390</used>
+      <free>30330</free>
+    </memory>
+    <memory name="program">
+      <units>bytes</units>
+      <length>261888</length>
+      <used>14127</used>
+      <free>247761</free>
+    </memory>
+  </executable>
+</project>
