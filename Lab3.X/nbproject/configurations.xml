@@ -5,9 +5,13 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>joystick.h</itemPath>
-      <itemPath>lcd.h</itemPath>
       <itemPath>led.h</itemPath>
+      <itemPath>crc16.h</itemPath>
+      <itemPath>lab3.h</itemPath>
+      <itemPath>lcd.h</itemPath>
+      <itemPath>timer.h</itemPath>
       <itemPath>types.h</itemPath>
+      <itemPath>uart.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -16,7 +20,10 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>crc16.c</itemPath>
       <itemPath>main.c</itemPath>
+      <itemPath>timer.c</itemPath>
+      <itemPath>uart.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -24,6 +31,9 @@
       <itemPath>Makefile</itemPath>
     </logicalFolder>
   </logicalFolder>
+  <sourceRootList>
+    <Elem>../lab3_files</Elem>
+  </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
     <conf name="default" type="2">

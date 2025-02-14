@@ -5,7 +5,7 @@
  * http://sourceforge.net/projects/serialglcdlib/
  *
  * Adapted by: N. Edwards - 3 Aug, 2011 - U of Illinois
- *
+ * Modified by: Renato Mancuso (BU) - Feb 2019
  *
 
 SUMMARY:
@@ -36,9 +36,17 @@ void lcd_initialize(void);
 	lcd_send_cmd(LCD_CMD_SETCOORD_Y);\
 	lcd_send((Y)*CHAR_HEIGHT);
 
-#define lcd_printf(...) \
-	printf(__VA_ARGS__);\
-	fflush(stdout);
+#define lcd_printf_d(...)             \
+    do {                              \
+        uint16_t len;                 \
+    	len = printf(__VA_ARGS__);    \
+        fflush(stdout);               \
+        __delay_ms(len * 15);         \
+    } while (0)
+
+#define lcd_printf(...)         \
+    	printf(__VA_ARGS__);    \
+        fflush(stdout);         
 
 #define lcd_clear() \
 	lcd_send_cmd(LCD_CMD_CLRSCR);
