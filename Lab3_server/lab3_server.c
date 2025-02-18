@@ -107,7 +107,7 @@ int main(int argc, char * argv[]) {
   /*
    * Set up the serial port
    * Control modes (c_cflag):
-   *  - B2400:	9600 Baud
+   *  - B2400:	9600 Baud // INCORRECT COMMENT!?
    *  - CS8:	8 data bits
    *  - CLOCAL:	Ignore modem control lines
    *  - CREAD:	Enable receiving
