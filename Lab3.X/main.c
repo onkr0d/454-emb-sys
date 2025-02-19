@@ -13,19 +13,20 @@
 
 // Primary (XT, HS, EC) Oscillator without PLL
 _FOSCSEL(FNOSC_PRIPLL);
+
 // OSC2 Pin Function: OSC2 is Clock Output - Primary Oscillator Mode: XT Crystanl
 _FOSC(OSCIOFNC_ON & POSCMD_XT);
+
 // Watchdog Timer Enabled/disabled by user software
 _FWDT(FWDTEN_OFF);
+
 // Disable Code Protection
-_FGS(GCP_OFF);   
+_FGS(GCP_OFF);
 
-
-
-int main(void)
-{	
-	/* Q: What is my purpose? */
-	/* A: You pass butter. */
-	/* Q: Oh. My. God. */
-}	
+int main(void) {
+    /* Q: What is my purpose? */
+    /* A: You pass butter. */
+    /* Q: Oh. My. God. */
+    
+}
 
