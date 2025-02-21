@@ -27,23 +27,23 @@ inline void uart2_init(uint16_t baud) {
     // Fosc= Fin*M/(N1*N2), Fcy=Fosc/2
     // Fosc= 8M*40(2*2)=80Mhz for 8M input clock
 
+//  Tiger, Ivan
+    //  what is this block doing?
     
-    
-/*   
     RCONbits.SWDTEN = 0; // Disable Watch Dog Timer
     while (OSCCONbits.LOCK != 1) {
     }; // Wait for PLL to lock
     
-*/
+    // end block
     
     
     U2MODEbits.STSEL = 0; // 1-stop bit
     U2MODEbits.PDSEL = 0; // No Parity, 8-data bits
     U2MODEbits.ABAUD = 0; // Auto-Baud Disabled
     U2MODEbits.BRGH = 0; // Low Speed mode
-//    U2BRG = BRGVAL; BAUD Rate Setting for 9600
+//    U2BRG = BRGVAL; // BAUD Rate Setting for 9600
 
-    U2BRG =   ( (FCY) / ( 9600 * 16UL) ) - 1 ; // BAUD Rate Setting for 9600
+    U2BRG =  ( ( (uint32_t) 800000 ) / 9600 ) - 1 ; // BAUD Rate Setting for 9600
 
     U2STAbits.UTXISEL0 = 0; // Interrupt after one Tx character is transmitted
     U2STAbits.UTXISEL1 = 0;
@@ -54,49 +54,29 @@ inline void uart2_init(uint16_t baud) {
     for (i = 0; i < 4160; i++) {
         Nop();
     }
-   
-    uint8_t data;
+    
+//    Send continously -- test serial for ABS and linux    
+    
+    while (1) { 
+        //* labmanual page 18
  
- uart2_send_8( 'g') ;  
+        while (U2STAbits.UTXBF);
+        U1TXREG = 'a'; // Transmit one character
+        while(!U2STAbits.TRMT);
 
- uart2_recv(& data) ;     
-        
-        
-        U1TXREG = data + 0x41 ;  // Transmit one character
-
-    while (1);
-
-
+    //    while (1) {
+    }
 }
 
 void __attribute__((__interrupt__)) _U2TXInterrupt(void) {
 //    IFS0bits.U2TXIF = 0; // clear TX interrupt flag
-    U2TXREG = 'c'; // Transmit one character
+    U2TXREG = 'a'; // Transmit one character
 }
 
 void uart2_send_8(int8_t data) {
     /* Implement me please. */
-    
-    while (U2STAbits.UTXBF);
-    U2TXREG = data & 0x00ff ;
-                while (! U2STAbits.TRMT) ;
-    
 }
 
 int8_t uart2_recv(uint8_t* data) {
     /* Implement me please. */
-    
-
-    
-       if ( U2STAbits.OERR )
-             U2STAbits.OERR = 0 ;           
-   
-    
-   
-    while ( ! U2STAbits.URXDA );
-             data = U2RXREG & 0x00f ; 
-    
-             while (U1STAbits.UTXBF);  
-    
-    
 }

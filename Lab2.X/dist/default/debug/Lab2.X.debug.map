@@ -4,11 +4,11 @@ Tool Name:
   /opt/microchip/xc16/v1.70/bin/bin/../bin/coff-ld
 
 Command:
-  -T/tmp/tmp000011e9.00 \
-  -T/tmp/tmp000011e9.01 \
-  -T/tmp/tmp000011e9.02 \
-  -T/tmp/tmp000011e9.03 \
-  -T/tmp/tmp000011e9.04 \
+  -T/tmp/tmp00001718.00 \
+  -T/tmp/tmp00001718.01 \
+  -T/tmp/tmp00001718.02 \
+  -T/tmp/tmp00001718.03 \
+  -T/tmp/tmp00001718.04 \
   -p33FJ256MC710 \
   --mdfp=/opt/microchip/mplabx/v6.15/packs/Microchip/dsPIC33F-GP-MC_DFP/1.3.64/xc16 \
   -o \
@@ -789,7 +789,7 @@ __FSS
 
 __FGS             0xf80004          0x2
  *(__FGS.sec*)
- __FGS.sec        0xf80004          0x2 /CW/_FGS0S€
+ __FGS.sec        0xf80004          0x2 /CW/_FGS0Ã4
                   0xf80004                  _FGS.sec
 
 __FOSCSEL         0xf80006          0x2
@@ -2158,7 +2158,7 @@ LOAD /opt/microchip/xc16/v1.70/bin/bin/../../lib/libm-coff.a
 LOAD /opt/microchip/xc16/v1.70/bin/bin/../../lib/liblega-c-coff.a
 END GROUP
 OUTPUT(dist/default/debug/Lab2.X.debug.cof coff-pic30)
-LOAD /CW/_FGS0S€
+LOAD /CW/_FGS0Ã4
 LOAD jump_table
 LOAD data_init
 LOAD default_isr
