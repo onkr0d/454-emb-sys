@@ -15,7 +15,7 @@
 
 #include <p33Fxxxx.h>
 // do not change the order of the following 3 definitions
-# define FCY 12800000UL
+#define FCY 12800000UL
 #include <stdio.h>
 #include <libpic30.h>
 
@@ -49,8 +49,11 @@ _FWDT(FWDTEN_OFF);
 _FGS(GCP_OFF);
 
 int main(void) {
-        
-        /* LCD Initialization Sequence */
+    /* Q: What is my purpose? */
+    /* A: You pass butter. */
+    /* Q: Oh. My. God. */
+
+    /* LCD Initialization Sequence */
     __C30_UART = 1;
     lcd_initialize();
     lcd_clear();
@@ -63,16 +66,13 @@ int main(void) {
 
 
     // serial test -- see uart.c
-                SETLED(   LED1_PORT );
-                CLEARLED( LED2_PORT );               
-    uart2_init( 9600 );
-            
-                CLEARLED(  LED1_PORT );
-                SETLED(    LED2_PORT );
-                
-                /* Q: What is my purpose? */
-    /* A: You pass butter. */
-    /* Q: Oh. My. God. */
-    
+    SETLED(LED1_PORT);
+    CLEARLED(LED2_PORT);
+    uart2_init(9600);
+
+    CLEARLED(LED1_PORT);
+    SETLED(LED2_PORT);
+
+
 }
 

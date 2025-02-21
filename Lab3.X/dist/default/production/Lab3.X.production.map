@@ -94,12 +94,12 @@ Default Scalar Model: Small
 
 section                    address   length (PC units)   length (bytes) (dec)
 -------                    -------   -----------------   --------------------
-.text                        0x200                0xfa           0x177  (375)
-.text                        0x2fa               0x466           0x699  (1689)
-.dinit                       0x760                0x10            0x18  (24)
-.text                        0x770                 0x8             0xc  (12)
+.text                        0x200                0xe4           0x156  (342)
+.text                        0x2e4               0x466           0x699  (1689)
+.dinit                       0x74a                0x10            0x18  (24)
+.text                        0x75a                 0x8             0xc  (12)
 
-                 Total "program" memory used (bytes):          0x834  (2100) <1%
+                 Total "program" memory used (bytes):          0x813  (2067) <1%
 
 
 "data" Memory  [Origin = 0x800, Length = 0x7800]
@@ -141,84 +141,82 @@ External Symbols in Program Memory (by address):
                   0x000240                  ___delay32
                   0x000262                  __data_init
                   0x000262                  __data_init_standard
-                  0x0002d8                  __U2TXInterrupt
-                  0x0002ee                  __DefaultInterrupt
-                  0x0002f2                  _OpenUART1
-                  0x0002fa                  _lcd_initialize
-                  0x00030e                  _lcd_send
-                  0x000332                  _lcd_send_str
-                  0x000356                  _lcd_send_cmd
-                  0x000366                  _clearLCD
-                  0x000374                  _setDebug
-                  0x000388                  _backLight
-                  0x00039c                  _drawCircle
-                  0x0003c2                  _toggleCRLF
-                  0x0003d0                  _eraseBlock
-                  0x0003f6                  _resetLCD
-                  0x000404                  _changeBaud
-                  0x00042a                  _toggleFont
-                  0x000438                  _setFontMode
-                  0x00044c                  _drawSprite
-                  0x000472                  _drawLine
-                  0x00049e                  _uploadSprite
-                  0x0004da                  _drawBox
-                  0x000506                  _togglePixel
-                  0x000568                  _drawFilledBox
-                  0x000594                  _reverseColor
-                  0x0005a2                  _toggleSplash
-                  0x0005b0                  _drawData
-                  0x00060a                  _gotoPosition
-                  0x00062c                  _gotoLine
-                  0x000658                  _uart2_init
-                  0x00069c                  _uart2_send_8
-                  0x0006c4                  _uart2_recv
-                  0x0006f4                  _crc_update
-                  0x000734                  _main
-                  0x000770                  _set_timer1
+                  0x0002d8                  __DefaultInterrupt
+                  0x0002dc                  _OpenUART1
+                  0x0002e4                  _lcd_initialize
+                  0x0002f8                  _lcd_send
+                  0x00031c                  _lcd_send_str
+                  0x000340                  _lcd_send_cmd
+                  0x000350                  _clearLCD
+                  0x00035e                  _setDebug
+                  0x000372                  _backLight
+                  0x000386                  _drawCircle
+                  0x0003ac                  _toggleCRLF
+                  0x0003ba                  _eraseBlock
+                  0x0003e0                  _resetLCD
+                  0x0003ee                  _changeBaud
+                  0x000414                  _toggleFont
+                  0x000422                  _setFontMode
+                  0x000436                  _drawSprite
+                  0x00045c                  _drawLine
+                  0x000488                  _uploadSprite
+                  0x0004c4                  _drawBox
+                  0x0004f0                  _togglePixel
+                  0x000552                  _drawFilledBox
+                  0x00057e                  _reverseColor
+                  0x00058c                  _toggleSplash
+                  0x00059a                  _drawData
+                  0x0005f4                  _gotoPosition
+                  0x000616                  _gotoLine
+                  0x000642                  _uart2_init
+                  0x000686                  _uart2_send_8
+                  0x0006ae                  _uart2_recv
+                  0x0006de                  _crc_update
+                  0x00071e                  _main
+                  0x00075a                  _set_timer1
                   0xf80004                  __FGS.sec
 
 External Symbols in Program Memory (by name):
 
-                  0x0002f2                  _OpenUART1
-                  0x0002ee                  __DefaultInterrupt
+                  0x0002dc                  _OpenUART1
+                  0x0002d8                  __DefaultInterrupt
                   0xf80004                  __FGS.sec
-                  0x0002d8                  __U2TXInterrupt
                   0x000240                  ___delay32
                   0x000262                  __data_init
                   0x000262                  __data_init_standard
                   0x000230                  __psv_init
                   0x000200                  __resetPRI
-                  0x000388                  _backLight
-                  0x000404                  _changeBaud
-                  0x000366                  _clearLCD
-                  0x0006f4                  _crc_update
-                  0x0004da                  _drawBox
-                  0x00039c                  _drawCircle
-                  0x0005b0                  _drawData
-                  0x000568                  _drawFilledBox
-                  0x000472                  _drawLine
-                  0x00044c                  _drawSprite
-                  0x0003d0                  _eraseBlock
-                  0x00062c                  _gotoLine
-                  0x00060a                  _gotoPosition
-                  0x0002fa                  _lcd_initialize
-                  0x00030e                  _lcd_send
-                  0x000356                  _lcd_send_cmd
-                  0x000332                  _lcd_send_str
-                  0x000734                  _main
-                  0x0003f6                  _resetLCD
-                  0x000594                  _reverseColor
-                  0x000374                  _setDebug
-                  0x000438                  _setFontMode
-                  0x000770                  _set_timer1
-                  0x0003c2                  _toggleCRLF
-                  0x00042a                  _toggleFont
-                  0x000506                  _togglePixel
-                  0x0005a2                  _toggleSplash
-                  0x000658                  _uart2_init
-                  0x0006c4                  _uart2_recv
-                  0x00069c                  _uart2_send_8
-                  0x00049e                  _uploadSprite
+                  0x000372                  _backLight
+                  0x0003ee                  _changeBaud
+                  0x000350                  _clearLCD
+                  0x0006de                  _crc_update
+                  0x0004c4                  _drawBox
+                  0x000386                  _drawCircle
+                  0x00059a                  _drawData
+                  0x000552                  _drawFilledBox
+                  0x00045c                  _drawLine
+                  0x000436                  _drawSprite
+                  0x0003ba                  _eraseBlock
+                  0x000616                  _gotoLine
+                  0x0005f4                  _gotoPosition
+                  0x0002e4                  _lcd_initialize
+                  0x0002f8                  _lcd_send
+                  0x000340                  _lcd_send_cmd
+                  0x00031c                  _lcd_send_str
+                  0x00071e                  _main
+                  0x0003e0                  _resetLCD
+                  0x00057e                  _reverseColor
+                  0x00035e                  _setDebug
+                  0x000422                  _setFontMode
+                  0x00075a                  _set_timer1
+                  0x0003ac                  _toggleCRLF
+                  0x000414                  _toggleFont
+                  0x0004f0                  _togglePixel
+                  0x00058c                  _toggleSplash
+                  0x000642                  _uart2_init
+                  0x0006ae                  _uart2_recv
+                  0x000686                  _uart2_send_8
+                  0x000488                  _uploadSprite
 
 Memory Configuration
 
@@ -281,7 +279,7 @@ LOAD /opt/microchip/xc16/v1.70/bin/bin/../../lib/libfx-coff.a
                   0x000002          0x2 SHORT 0x0 ((ABSOLUTE (__reset) >> 0x10) & 0x7f)
                   0x000003          0x2 SHORT 0x0
 
-.text             0x000200         0xfa
+.text             0x000200         0xe4
  *(.init)
  .init            0x000200         0x40 /opt/microchip/xc16/v1.70/bin/bin/../../lib/liblega-pic30-coff.a(crt0_standard.o)
                   0x000200                  _reset
@@ -295,16 +293,14 @@ LOAD /opt/microchip/xc16/v1.70/bin/bin/../../lib/libfx-coff.a
  *(.user_init)
  *(.handle)
  *(.isr*)
- .isr.text        0x0002d8         0x16 build/default/production/uart.o
-                  0x0002d8                  _U2TXInterrupt
- .isr             0x0002ee          0x4 default_isr
-                  0x0002ee                  _DefaultInterrupt
+ .isr             0x0002d8          0x4 default_isr
+                  0x0002d8                  _DefaultInterrupt
  *(.libc)
  *(.libm)
  *(.libdsp)
  *(.lib*)
- .libperi         0x0002f2          0x8 /opt/microchip/xc16/v1.70/bin/bin/../../lib/dsPIC33F/libp33FJ256MC710-coff.a(OpenUART1.o)
-                  0x0002f2                  OpenUART1
+ .libperi         0x0002dc          0x8 /opt/microchip/xc16/v1.70/bin/bin/../../lib/dsPIC33F/libp33FJ256MC710-coff.a(OpenUART1.o)
+                  0x0002dc                  OpenUART1
 
 usercode
  *(usercode)
@@ -317,7 +313,7 @@ __FSS
 
 __FGS             0xf80004          0x2
  *(__FGS.sec*)
- __FGS.sec        0xf80004          0x2 /CW/_FGSpàæ
+ __FGS.sec        0xf80004          0x2 /CW/_FGSàŸå
                   0xf80004                  _FGS.sec
 
 __FOSCSEL         0xf80006          0x2
@@ -1685,7 +1681,7 @@ LOAD /opt/microchip/xc16/v1.70/bin/bin/../../lib/libm-coff.a
 LOAD /opt/microchip/xc16/v1.70/bin/bin/../../lib/liblega-c-coff.a
 END GROUP
 OUTPUT(dist/default/production/Lab3.X.production.cof coff-pic30)
-LOAD /CW/_FGSpàæ
+LOAD /CW/_FGSàŸå
 LOAD data_init
 LOAD default_isr
 
@@ -1722,50 +1718,45 @@ __c30_signature
                     0x0802          0x2 /opt/microchip/xc16/v1.70/bin/bin/../../lib/liblega-pic30-coff.a(c30_uart.Lo)
                     0x0802                  __C30_UART
 
-.ivt._U2TXInterrupt
-                  0x000052          0x2
- .ivt._U2TXInterrupt
-                  0x000052          0x2 build/default/production/uart.o
+.text             0x0002e4        0x466
+ .text            0x0002e4        0x35e ../All_headers_misc/lcd.a(lcd.o)
+                  0x0002e4                  lcd_initialize
+                  0x0002f8                  lcd_send
+                  0x00031c                  lcd_send_str
+                  0x000340                  lcd_send_cmd
+                  0x000350                  clearLCD
+                  0x00035e                  setDebug
+                  0x000372                  backLight
+                  0x000386                  drawCircle
+                  0x0003ac                  toggleCRLF
+                  0x0003ba                  eraseBlock
+                  0x0003e0                  resetLCD
+                  0x0003ee                  changeBaud
+                  0x000414                  toggleFont
+                  0x000422                  setFontMode
+                  0x000436                  drawSprite
+                  0x00045c                  drawLine
+                  0x000488                  uploadSprite
+                  0x0004c4                  drawBox
+                  0x0004f0                  togglePixel
+                  0x000552                  drawFilledBox
+                  0x00057e                  reverseColor
+                  0x00058c                  toggleSplash
+                  0x00059a                  drawData
+                  0x0005f4                  gotoPosition
+                  0x000616                  gotoLine
+ .text            0x000642         0x9c build/default/production/uart.o
+                  0x000642                  uart2_init
+                  0x000686                  uart2_send_8
+                  0x0006ae                  uart2_recv
+ .text            0x0006de         0x40 build/default/production/crc16.o
+                  0x0006de                  crc_update
+ .text            0x00071e         0x2c build/default/production/main.o
+                  0x00071e                  main
 
-.text             0x0002fa        0x466
- .text            0x0002fa        0x35e ../All_headers_misc/lcd.a(lcd.o)
-                  0x0002fa                  lcd_initialize
-                  0x00030e                  lcd_send
-                  0x000332                  lcd_send_str
-                  0x000356                  lcd_send_cmd
-                  0x000366                  clearLCD
-                  0x000374                  setDebug
-                  0x000388                  backLight
-                  0x00039c                  drawCircle
-                  0x0003c2                  toggleCRLF
-                  0x0003d0                  eraseBlock
-                  0x0003f6                  resetLCD
-                  0x000404                  changeBaud
-                  0x00042a                  toggleFont
-                  0x000438                  setFontMode
-                  0x00044c                  drawSprite
-                  0x000472                  drawLine
-                  0x00049e                  uploadSprite
-                  0x0004da                  drawBox
-                  0x000506                  togglePixel
-                  0x000568                  drawFilledBox
-                  0x000594                  reverseColor
-                  0x0005a2                  toggleSplash
-                  0x0005b0                  drawData
-                  0x00060a                  gotoPosition
-                  0x00062c                  gotoLine
- .text            0x000658         0x9c build/default/production/uart.o
-                  0x000658                  uart2_init
-                  0x00069c                  uart2_send_8
-                  0x0006c4                  uart2_recv
- .text            0x0006f4         0x40 build/default/production/crc16.o
-                  0x0006f4                  crc_update
- .text            0x000734         0x2c build/default/production/main.o
-                  0x000734                  main
+.dinit            0x00074a         0x10
+ .dinit           0x00074a         0x10 data_init
 
-.dinit            0x000760         0x10
- .dinit           0x000760         0x10 data_init
-
-.text             0x000770          0x8
- .text            0x000770          0x8 build/default/production/timer.o
-                  0x000770                  set_timer1
+.text             0x00075a          0x8
+ .text            0x00075a          0x8 build/default/production/timer.o
+                  0x00075a                  set_timer1

@@ -22,81 +22,54 @@
 unsigned int i;
 
 inline void uart2_init(uint16_t baud) {
-    /* Implement me please. */
-    // Configure Oscillator to operate the device at 40Mhz
-    // Fosc= Fin*M/(N1*N2), Fcy=Fosc/2
-    // Fosc= 8M*40(2*2)=80Mhz for 8M input clock
 
-    
-    
-/*   
-    RCONbits.SWDTEN = 0; // Disable Watch Dog Timer
-    while (OSCCONbits.LOCK != 1) {
-    }; // Wait for PLL to lock
-    
-*/
-    
-    
     U2MODEbits.STSEL = 0; // 1-stop bit
     U2MODEbits.PDSEL = 0; // No Parity, 8-data bits
     U2MODEbits.ABAUD = 0; // Auto-Baud Disabled
     U2MODEbits.BRGH = 0; // Low Speed mode
-//    U2BRG = BRGVAL; BAUD Rate Setting for 9600
 
-    U2BRG =   ( (FCY) / ( 9600 * 16UL) ) - 1 ; // BAUD Rate Setting for 9600
+    U2BRG = ((FCY) / (9600 * 16UL)) - 1; // BAUD Rate Setting for 9600
 
     U2STAbits.UTXISEL0 = 0; // Interrupt after one Tx character is transmitted
     U2STAbits.UTXISEL1 = 0;
-//    IEC0bits.U2TXIE = 1; // Enable UART Tx interrupt
+    
+    //IEC0bits.U2TXIE = 1; // Enable UART Tx interrupt
     U2MODEbits.UARTEN = 1; // Enable UART
     U2STAbits.UTXEN = 1; // Enable UART Tx
-    /* wait at least 104 usec (1/9600) before sending first char */
+    
+    /* wait at least 104 use (1/9600) before sending first char */
     for (i = 0; i < 4160; i++) {
         Nop();
     }
-   
-    uint8_t data;
- 
- uart2_send_8( 'g') ;  
 
- uart2_recv(& data) ;     
-        
-        
-        U1TXREG = data + 0x41 ;  // Transmit one character
+    uint8_t data;
+
+    uart2_send_8('g');
+    uart2_recv(& data);
+
+    U1TXREG = data + 0x41; // Transmit one character
 
     while (1);
 
-
 }
 
-void __attribute__((__interrupt__)) _U2TXInterrupt(void) {
-//    IFS0bits.U2TXIF = 0; // clear TX interrupt flag
-    U2TXREG = 'c'; // Transmit one character
-}
 
 void uart2_send_8(int8_t data) {
-    /* Implement me please. */
-    
+
     while (U2STAbits.UTXBF);
-    U2TXREG = data & 0x00ff ;
-                while (! U2STAbits.TRMT) ;
-    
+    U2TXREG = data & 0x00ff;
+    while (!U2STAbits.TRMT);
+
 }
 
 int8_t uart2_recv(uint8_t* data) {
-    /* Implement me please. */
-    
 
+    if (U2STAbits.OERR)
+        U2STAbits.OERR = 0;
+
+    while (!U2STAbits.URXDA);
+    data = U2RXREG & 0x00f;
+    while (U1STAbits.UTXBF);
     
-       if ( U2STAbits.OERR )
-             U2STAbits.OERR = 0 ;           
-   
-    
-   
-    while ( ! U2STAbits.URXDA );
-             data = U2RXREG & 0x00f ; 
-    
-             while (U1STAbits.UTXBF);  
-    
-    
+//  Return 1 for success, 0 for failure
 }
