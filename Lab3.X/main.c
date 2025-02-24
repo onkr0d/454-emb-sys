@@ -48,6 +48,9 @@ _FWDT(FWDTEN_OFF);
 // Disable Code Protection
 _FGS(GCP_OFF);
 
+
+unsigned char buffer[] = "abcdefghijklmn\0";
+
 int main(void) {
     /* Q: What is my purpose? */
     /* A: You pass butter. */
@@ -59,7 +62,7 @@ int main(void) {
     lcd_clear();
 
 
-       
+
 
     CLEARBIT(LED1_TRIS); // Set Pin to Output
     CLEARBIT(LED2_TRIS); // Set Pin to Output
@@ -72,42 +75,94 @@ int main(void) {
     // serial test -- see uart.c      
     uart2_init(9600);
 
-    SETLED(   LED1_PORT);
-    CLEARLED( LED2_PORT);
-    CLEARLED( LED3_PORT);
-    
-    uint8_t data;
+    SETLED(LED1_PORT);
+    CLEARLED(LED2_PORT);
+    CLEARLED(LED3_PORT);
+    CLEARLED(LED4_PORT);
 
-    uart2_send_8('q');
-    SETLED(   LED2_PORT);   
-//    uart2_recv( &data);
 
- 
-    
-    
-//    CLEARLED( LED1_PORT);
-    SETLED(   LED3_PORT);
-    
-    
+    //    uart2_send_8('q');
+
+
+    lcd_locate(0, 0);
+    lcd_printf("hello");
+    lcd_locate(0, 1);
+
+    SETLED(LED2_PORT);
+
+    int print = 0;
+    int n = 0;
+    while (1) {
+
+
+
+        for (n = 0; n < 4; n++)
+            uart2_recv(buffer + n);
+
+
+
+        uint16_t crc_x;
+        for (crc_x = 0; n < 4 + buffer[3]; n++) {
+            uart2_recv(buffer + n);
+            crc_x = crc_update(crc_x, buffer[n]);
+        }
+
+        buffer[n] = 0;
+
+        // concatenate hex values
+        if (crc_x != ((uint16_t) buffer[1] * 256 + buffer[2])) {
+            lcd_locate(0, 0);
+            lcd_printf("our:%x t:%x", crc_x, 256 * buffer[1] + buffer[2]);
+            lcd_locate(0, 1);
+        }
+
+        //            while( *buffer != 0 );
+        //    CLEARLED( LED1_PORT);
+        SETLED(LED3_PORT);
+        //        while(1);
+
         // Task 1: Display Group Name
-    // lcd_locate (column, row)
-	lcd_locate(0,0);
-	lcd_printf("test:  %x" , data );
-    lcd_locate(0,1);
-    
-    
-//    uart2_send_8( data + 0x41 );  
-//    U1TXREG = data + 0x41; // Transmit one character
+        // lcd_locate (column, row)
+        /*        if (++print % 100 == 0) { */
+        //        lcd_locate(0, 0);
+        //       lcd_printf("test:  %x  %x  %x  %s", *(buffer + 1), *(buffer + 2), *(buffer + 3), buffer + 4);
+        lcd_locate(0, 1);
+        lcd_printf("length: %d %x", *(buffer + 3), crc_x);
+        lcd_locate(0, 2);
+        lcd_printf("val: %s ", buffer + 4);
+        lcd_locate(0, 3);
+        lcd_printf("%x  %x ", buffer[1], buffer[2]);
 
-    CLEARLED( LED2_PORT);
-    SETLED(   LED3_PORT);
-    
-    
-    
-    while (1);
 
-    
-    
+
+
+        if ((crc_x != 256 * buffer[1] + buffer[2]) || 00 != buffer[0]) {
+
+            // RETRY
+            uart2_send_8(0x00);
+
+        } else {
+
+
+            // SUCCESS
+            print = 0;
+
+            uart2_send_8(0x01);
+        }
+
+    }
+
+    //    uart2_send_8( data + 0x41 );  
+    //    U1TXREG = data + 0x41; // Transmit one character
+
+    //    CLEARLED(LED2_PORT);
+    SETLED(LED4_PORT);
+
+
+
+
+
+
 
 }
 

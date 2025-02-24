@@ -59,7 +59,7 @@ int8_t uart2_recv(uint8_t* data) {
         U2STAbits.OERR = 0;
 
     while (!U2STAbits.URXDA);
-    data = U2RXREG & 0x00ff;
+    *data = U2RXREG & 0x00ff;
 //    while (U1STAbits.UTXBF);
     
 //  Return 1 for success, 0 for failure
