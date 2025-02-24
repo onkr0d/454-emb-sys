@@ -59,20 +59,55 @@ int main(void) {
     lcd_clear();
 
 
+       
+
     CLEARBIT(LED1_TRIS); // Set Pin to Output
     CLEARBIT(LED2_TRIS); // Set Pin to Output
     CLEARBIT(LED3_TRIS); // Set Pin to Output
     CLEARBIT(LED4_TRIS); // Set Pin to Output
 
 
-    // serial test -- see uart.c
-    SETLED(LED1_PORT);
-    CLEARLED(LED2_PORT);
+
+
+    // serial test -- see uart.c      
     uart2_init(9600);
 
-    CLEARLED(LED1_PORT);
-    SETLED(LED2_PORT);
+    SETLED(   LED1_PORT);
+    CLEARLED( LED2_PORT);
+    CLEARLED( LED3_PORT);
+    
+    uint8_t data;
 
+    uart2_send_8('q');
+    SETLED(   LED2_PORT);   
+//    uart2_recv( &data);
+
+ 
+    
+    
+//    CLEARLED( LED1_PORT);
+    SETLED(   LED3_PORT);
+    
+    
+        // Task 1: Display Group Name
+    // lcd_locate (column, row)
+	lcd_locate(0,0);
+	lcd_printf("test:  %x" , data );
+    lcd_locate(0,1);
+    
+    
+//    uart2_send_8( data + 0x41 );  
+//    U1TXREG = data + 0x41; // Transmit one character
+
+    CLEARLED( LED2_PORT);
+    SETLED(   LED3_PORT);
+    
+    
+    
+    while (1);
+
+    
+    
 
 }
 

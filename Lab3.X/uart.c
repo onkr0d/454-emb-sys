@@ -42,15 +42,6 @@ inline void uart2_init(uint16_t baud) {
         Nop();
     }
 
-    uint8_t data;
-
-    uart2_send_8('g');
-    uart2_recv(& data);
-
-    U1TXREG = data + 0x41; // Transmit one character
-
-    while (1);
-
 }
 
 
@@ -68,8 +59,8 @@ int8_t uart2_recv(uint8_t* data) {
         U2STAbits.OERR = 0;
 
     while (!U2STAbits.URXDA);
-    data = U2RXREG & 0x00f;
-    while (U1STAbits.UTXBF);
+    data = U2RXREG & 0x00ff;
+//    while (U1STAbits.UTXBF);
     
 //  Return 1 for success, 0 for failure
 }

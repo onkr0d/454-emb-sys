@@ -128,7 +128,7 @@ int main(int argc, char * argv[]) {
   tcflush(ifd, TCIFLUSH);
   tcsetattr(ifd, TCSANOW, & tio);
 
-  while (1) {
+//  while (1) {
     unsigned char ack = MSG_NACK;
     int crc = 0xff, attempts = 0;
 
@@ -151,7 +151,7 @@ int main(int argc, char * argv[]) {
     // Compute crc (only lowest 16 bits are returned)
     crc = pc_crc16(str, N);
     printf("crc: %x\n", crc);
-/*
+
     while (!ack) {
       printf("Sending (attempt %d)...\n", ++attempts);
 
@@ -168,16 +168,28 @@ int main(int argc, char * argv[]) {
       dprintf(ofd, "%s", str); // Message
 */
       printf("Message sent, waiting for ack... ");
-while(1) {
+/* while(1) {
       // Wait for MSG_ACK or MSG_NAK
-
+*/
+ 
+//  dprintf(ifd, "%c", 'T' );
+ 
       printf("%x\n", 140 );
       read(ifd, &ack, 1);
            printf("%x\n", ack );
-  }  
-    printf("\n");
-  }
+  
+  
+//  dprintf(ifd, "%c", 'R' );
 
+  
+  
+ // }  
+    printf("\n");
+  
+  
+ 
+  
+  
   // Reset the serial port parameters
   tcflush(ifd, TCIFLUSH);
   tcsetattr(ifd, TCSANOW, & oldtio);
