@@ -33,7 +33,7 @@
 #include "timer.h"
 
 
-#
+//#
 // Primary (XT, HS, EC) Oscillator without PLL
 _FOSCSEL(FNOSC_PRIPLL);
 
@@ -48,6 +48,9 @@ _FGS(GCP_OFF);
 
 
 unsigned char buffer[] = "abcdefghijklmn\0";
+unsigned int failures = 0;
+unsigned int ACK = 0x1;
+unsigned int NACK = 0x0;
 
 int main(void) {
     /* Q: What is my purpose? */
@@ -60,27 +63,19 @@ int main(void) {
     lcd_clear();
 
 
-
-
     CLEARBIT(LED1_TRIS); // Set Pin to Output
     CLEARBIT(LED2_TRIS); // Set Pin to Output
     CLEARBIT(LED3_TRIS); // Set Pin to Output
     CLEARBIT(LED4_TRIS); // Set Pin to Output
 
-
-
-
     // serial test -- see uart.c      
     uart2_init(9600);
+
 
     SETLED(LED1_PORT);
     CLEARLED(LED2_PORT);
     CLEARLED(LED3_PORT);
     CLEARLED(LED4_PORT);
-
-
-    //    uart2_send_8('q');
-
 
     lcd_locate(0, 0);
     lcd_printf("hello");
@@ -88,52 +83,45 @@ int main(void) {
 
     SETLED(LED2_PORT);
 
-    int print = 0;
     int n = 0;
     while (1) {
-
-
-
-        for (n = 0; n < 4;)
+        for (n = 0; n < 4;) {
             n += 1 + uart2_recv(buffer + n);
+        }
+
+        set_timer1(0); // ignored = 1000ms*10^-3 * 12.8Mhz*10^6 * 1/256prescaler
+
+        //        set_timer1(50000);
+        lcd_locate(0, 7);
+        lcd_printf("PR1:%u TMR1:%u", PR1, TMR1);
 
 
-
+        if (*(buffer) != 0x0) {
+            // start byte is incorrect
+            lcd_locate(0, 4);
+            lcd_printf("ISB");
+            failures++;
+            uart2_send_8(NACK);
+            disableTimer();
+            continue;
+        }
 
         uint16_t crc_local;
         for (crc_local = 0; n < 4 + buffer[3];) {
-            if (0 == uart2_recv(buffer + n))
+            if (0 == uart2_recv(buffer + n)) {
                 crc_local = crc_update(crc_local, buffer[ n++ ]);
+            }
         }
-
-
 
         // end string 
         buffer[n] = 0;
 
-        // concatenate hex values
-        if (crc_local != ((uint16_t) buffer[1] * 256 + buffer[2])) {
-            lcd_locate(0, 0);
-            lcd_printf("our:%x t:%x", crc_local, 256 * buffer[1] + buffer[2]);
-            lcd_locate(0, 1);
-        }
-
-        //            while( *buffer != 0 );
-        //    CLEARLED( LED1_PORT);
-        SETLED(LED3_PORT);
-        //        while(1);
-
-        // Task 1: Display Group Name
-        // lcd_locate (column, row)
-        /*        if (++print % 100 == 0) { */
-        //        lcd_locate(0, 0);
-        //       lcd_printf("test:  %x  %x  %x  %s", *(buffer + 1), *(buffer + 2), *(buffer + 3), buffer + 4);
         lcd_locate(0, 1);
-        lcd_printf("length: %d %x", *(buffer + 3), crc_local);
+        lcd_printf("length: %d  %x", *(buffer + 3), crc_local);
         lcd_locate(0, 2);
-        lcd_printf("val: %s ", buffer + 4);
+        lcd_printf("msg: %s ", buffer + 4);
         lcd_locate(0, 3);
-        lcd_printf("%x  %x ", buffer[1], buffer[2]);
+        lcd_printf("fails: %d", failures);
 
 
         // check for extra byte
@@ -141,35 +129,42 @@ int main(void) {
         //         n += 1 +  uart2_recv(buffer + n);
 
         if ((crc_local != 256 * (uint16_t) buffer[1] + buffer[2]) /* || 0x00 != buffer[0] */) {
-
             // RETRY
-            uart2_send_8(0x00);
+            failures++;
+            lcd_locate(0, 4);
+            lcd_printf("CRC");
+            lcd_locate(0, 4);
 
+            uart2_send_8(NACK);
             SETLED(LED4_PORT);
-
-
         } else {
-
-
             // SUCCESS
-            print = 0;
-
-            uart2_send_8(0x01);
+            uart2_send_8(ACK);
         }
 
+        // disable timer again
+        disableTimer();
     }
-
-    //    uart2_send_8( data + 0x41 );  
-    //    U1TXREG = data + 0x41; // Transmit one character
-
-    //    CLEARLED(LED2_PORT);
-    //    SETLED(LED4_PORT);
-
-
-
-
-
-
-
 }
 
+void __attribute__((__interrupt__)) _T1Interrupt(void) {
+    lcd_locate(0, 5);
+    lcd_printf("INTR");
+        lcd_locate(0, 5);
+
+
+    //        failures++;
+    //        uart2_send_8(NACK);
+    CLEARBIT(IFS0bits.T1IF);
+}
+
+void disableTimer() {
+    TMR1 = 00;
+    //    T2CONbits.TON = 0; //disable timer
+    //    SETBIT(IFS0bits.T2IF); // set Timer1 Interrupt Flag - don't interrupt, we're done here
+
+    IFS0bits.T1IF = 1; // Set Timer1 Interrupt Flag
+    IEC0bits.T1IE = 0; // Disable Timer1 interrupt
+    T1CONbits.TON = 0; // Stop Timer
+
+}

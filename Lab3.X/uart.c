@@ -28,7 +28,7 @@ inline void uart2_init(uint16_t baud) {
     U2MODEbits.ABAUD = 0; // Auto-Baud Disabled
     U2MODEbits.BRGH = 0; // Low Speed mode
 
-    U2BRG = ((FCY) / (9600 * 16UL)) - 1; // BAUD Rate Setting for 9600
+    U2BRG = ((FCY) / (baud * 16UL)) - 1; // BAUD Rate Setting for 9600
 
     U2STAbits.UTXISEL0 = 0; // Interrupt after one Tx character is transmitted
     U2STAbits.UTXISEL1 = 0;
@@ -45,7 +45,6 @@ inline void uart2_init(uint16_t baud) {
 }
 
 void uart2_send_8(int8_t data) {
-
     while (U2STAbits.UTXBF);
     U2TXREG = data & 0x00ff;
     while (!U2STAbits.TRMT);
