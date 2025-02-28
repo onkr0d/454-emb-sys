@@ -30,9 +30,7 @@
 #include "uart.h"
 #include "crc16.h"
 #include "lab3.h"
-//  #include "timer.h"
-
-
+#include "timer.h"
 
 
 #
@@ -96,23 +94,27 @@ int main(void) {
 
 
 
-        for (n = 0; n < 4; n++)
-            uart2_recv(buffer + n);
+        for (n = 0; n < 4;)
+            n += 1 + uart2_recv(buffer + n);
 
 
 
-        uint16_t crc_x;
-        for (crc_x = 0; n < 4 + buffer[3]; n++) {
-            uart2_recv(buffer + n);
-            crc_x = crc_update(crc_x, buffer[n]);
+
+        uint16_t crc_local;
+        for (crc_local = 0; n < 4 + buffer[3];) {
+            if (0 == uart2_recv(buffer + n))
+                crc_local = crc_update(crc_local, buffer[ n++ ]);
         }
 
+
+
+        // end string 
         buffer[n] = 0;
 
         // concatenate hex values
-        if (crc_x != ((uint16_t) buffer[1] * 256 + buffer[2])) {
+        if (crc_local != ((uint16_t) buffer[1] * 256 + buffer[2])) {
             lcd_locate(0, 0);
-            lcd_printf("our:%x t:%x", crc_x, 256 * buffer[1] + buffer[2]);
+            lcd_printf("our:%x t:%x", crc_local, 256 * buffer[1] + buffer[2]);
             lcd_locate(0, 1);
         }
 
@@ -127,19 +129,24 @@ int main(void) {
         //        lcd_locate(0, 0);
         //       lcd_printf("test:  %x  %x  %x  %s", *(buffer + 1), *(buffer + 2), *(buffer + 3), buffer + 4);
         lcd_locate(0, 1);
-        lcd_printf("length: %d %x", *(buffer + 3), crc_x);
+        lcd_printf("length: %d %x", *(buffer + 3), crc_local);
         lcd_locate(0, 2);
         lcd_printf("val: %s ", buffer + 4);
         lcd_locate(0, 3);
         lcd_printf("%x  %x ", buffer[1], buffer[2]);
 
 
+        // check for extra byte
+        __delay_ms(50); // wait multiple 9600 byte periods
+        //         n += 1 +  uart2_recv(buffer + n);
 
-
-        if ((crc_x != 256 * buffer[1] + buffer[2]) || 00 != buffer[0]) {
+        if ((crc_local != 256 * (uint16_t) buffer[1] + buffer[2]) /* || 0x00 != buffer[0] */) {
 
             // RETRY
             uart2_send_8(0x00);
+
+            SETLED(LED4_PORT);
+
 
         } else {
 
@@ -156,7 +163,7 @@ int main(void) {
     //    U1TXREG = data + 0x41; // Transmit one character
 
     //    CLEARLED(LED2_PORT);
-    SETLED(LED4_PORT);
+    //    SETLED(LED4_PORT);
 
 
 

@@ -32,18 +32,17 @@ inline void uart2_init(uint16_t baud) {
 
     U2STAbits.UTXISEL0 = 0; // Interrupt after one Tx character is transmitted
     U2STAbits.UTXISEL1 = 0;
-    
+
     //IEC0bits.U2TXIE = 1; // Enable UART Tx interrupt
     U2MODEbits.UARTEN = 1; // Enable UART
     U2STAbits.UTXEN = 1; // Enable UART Tx
-    
+
     /* wait at least 104 use (1/9600) before sending first char */
     for (i = 0; i < 4160; i++) {
         Nop();
     }
 
 }
-
 
 void uart2_send_8(int8_t data) {
 
@@ -58,9 +57,16 @@ int8_t uart2_recv(uint8_t* data) {
     if (U2STAbits.OERR)
         U2STAbits.OERR = 0;
 
-    while (!U2STAbits.URXDA);
-    *data = U2RXREG & 0x00ff;
-//    while (U1STAbits.UTXBF);
-    
-//  Return 1 for success, 0 for failure
+    // data received
+    if (U2STAbits.URXDA) {
+        *data = U2RXREG & 0x00ff;
+        return 0;
+    }
+
+    // still waiting
+    return -1;
+
+    //    while (U1STAbits.UTXBF);
+
+    //  Return 0 for success, < 0 for failure
 }

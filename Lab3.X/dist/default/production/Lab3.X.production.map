@@ -64,7 +64,7 @@ Archive member included because of file (symbol)
 /opt/microchip/xc16/v1.70/bin/bin/../../lib/liblega-pic30-coff.a(c30_uart.Lo)
                               build/default/production/main.o (__C30_UART)
 /opt/microchip/xc16/v1.70/bin/bin/../../lib/liblega-pic30-coff.a(delay32.Lo)
-                              ../All_headers_misc/lcd.a(lcd.o) (__delay32)
+                              build/default/production/main.o (__delay32)
 /opt/microchip/xc16/v1.70/bin/bin/../../lib/liblega-pic30-coff.a(data_init_standard.o)
                               /opt/microchip/xc16/v1.70/bin/bin/../../lib/liblega-pic30-coff.a(crt0_standard.o) (_data_init_standard)
 /opt/microchip/xc16/v1.70/bin/bin/../../lib/liblega-c-coff.a(printf_cdnopsuxX.XXo)
@@ -158,11 +158,11 @@ section                    address   length (PC units)   length (bytes) (dec)
 -------                    -------   -----------------   --------------------
 .text                        0x200              0x11be          0x1a9d  (6813)
 .const                      0x13be                0x32            0x4b  (75)
-.text                       0x13f0               0x506           0x789  (1929)
-.dinit                      0x18f6                0xd4           0x13e  (318)
-.text                       0x19ca                0xcc           0x132  (306)
+.text                       0x13f0               0x50e           0x795  (1941)
+.dinit                      0x18fe                0xd4           0x13e  (318)
+.text                       0x19d2                0xce           0x135  (309)
 
-                 Total "program" memory used (bytes):         0x24e1  (9441) 3%
+                 Total "program" memory used (bytes):         0x24f0  (9456) 3%
 
 
 "data" Memory  [Origin = 0x800, Length = 0x7800]
@@ -288,11 +288,11 @@ External Symbols in Program Memory (by address):
                   0x001700                  _gotoPosition
                   0x001722                  _gotoLine
                   0x00174e                  _main
-                  0x0019ca                  _uart2_init
-                  0x001a00                  _uart2_send_8
-                  0x001a28                  _uart2_recv
-                  0x001a4e                  _crc_update
-                  0x001a8e                  _set_timer1
+                  0x0019d2                  _uart2_init
+                  0x001a08                  _uart2_send_8
+                  0x001a30                  _uart2_recv
+                  0x001a58                  _crc_update
+                  0x001a98                  _set_timer1
                   0xf80004                  __FGS.sec
 
 External Symbols in Program Memory (by name):
@@ -331,7 +331,7 @@ External Symbols in Program Memory (by name):
                   0x00147e                  _backLight
                   0x0014fa                  _changeBaud
                   0x00145c                  _clearLCD
-                  0x001a4e                  _crc_update
+                  0x001a58                  _crc_update
                   0x0015d0                  _drawBox
                   0x001492                  _drawCircle
                   0x0016a6                  _drawData
@@ -357,16 +357,16 @@ External Symbols in Program Memory (by name):
                   0x00168a                  _reverseColor
                   0x00146a                  _setDebug
                   0x00152e                  _setFontMode
-                  0x001a8e                  _set_timer1
+                  0x001a98                  _set_timer1
                   0x000760                  _strchr
                   0x000f88                  _strlen
                   0x0014b8                  _toggleCRLF
                   0x001520                  _toggleFont
                   0x0015fc                  _togglePixel
                   0x001698                  _toggleSplash
-                  0x0019ca                  _uart2_init
-                  0x001a28                  _uart2_recv
-                  0x001a00                  _uart2_send_8
+                  0x0019d2                  _uart2_init
+                  0x001a30                  _uart2_recv
+                  0x001a08                  _uart2_send_8
                   0x001594                  _uploadSprite
                   0x000d14                  fclose.XX_o:_closeall
                   0x0002ec                  printf_cdnopsuxX.XXo:_prout
@@ -538,7 +538,7 @@ __FSS
 
 __FGS             0xf80004          0x2
  *(__FGS.sec*)
- __FGS.sec        0xf80004          0x2 /CW/_FGS`…Û
+ __FGS.sec        0xf80004          0x2 /CW/_FGS@×R
                   0xf80004                  _FGS.sec
 
 __FOSCSEL         0xf80006          0x2
@@ -1907,7 +1907,7 @@ LOAD /opt/microchip/xc16/v1.70/bin/bin/../../lib/libm-coff.a
 LOAD /opt/microchip/xc16/v1.70/bin/bin/../../lib/liblega-c-coff.a
 END GROUP
 OUTPUT(dist/default/production/Lab3.X.production.cof coff-pic30)
-LOAD /CW/_FGS`…Û
+LOAD /CW/_FGS@×R
 LOAD jump_table
 LOAD data_init
 LOAD default_isr
@@ -2036,7 +2036,7 @@ __c30_signature
 .const              0x93be         0x32 load address 0x0013be  
  .const             0x93be         0x32 build/default/production/main.o
 
-.text             0x0013f0        0x506
+.text             0x0013f0        0x50e
  .text            0x0013f0        0x35e ../All_headers_misc/lcd.a(lcd.o)
                   0x0013f0                  lcd_initialize
                   0x001404                  lcd_send
@@ -2063,18 +2063,18 @@ __c30_signature
                   0x0016a6                  drawData
                   0x001700                  gotoPosition
                   0x001722                  gotoLine
- .text            0x00174e        0x1a8 build/default/production/main.o
+ .text            0x00174e        0x1b0 build/default/production/main.o
                   0x00174e                  main
 
-.dinit            0x0018f6         0xd4
- .dinit           0x0018f6         0xd4 data_init
+.dinit            0x0018fe         0xd4
+ .dinit           0x0018fe         0xd4 data_init
 
-.text             0x0019ca         0xcc
- .text            0x0019ca         0x84 build/default/production/uart.o
-                  0x0019ca                  uart2_init
-                  0x001a00                  uart2_send_8
-                  0x001a28                  uart2_recv
- .text            0x001a4e         0x40 build/default/production/crc16.o
-                  0x001a4e                  crc_update
- .text            0x001a8e          0x8 build/default/production/timer.o
-                  0x001a8e                  set_timer1
+.text             0x0019d2         0xce
+ .text            0x0019d2         0x86 build/default/production/uart.o
+                  0x0019d2                  uart2_init
+                  0x001a08                  uart2_send_8
+                  0x001a30                  uart2_recv
+ .text            0x001a58         0x40 build/default/production/crc16.o
+                  0x001a58                  crc_update
+ .text            0x001a98          0x8 build/default/production/timer.o
+                  0x001a98                  set_timer1

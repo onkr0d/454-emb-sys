@@ -10,10 +10,12 @@
 /****************************************************/
 
 #include <p33Fxxxx.h>
+
 //do not change the order of the following 3 definitions
 #define FCY 12800000UL 
 #include <stdio.h>
 #include <libpic30.h>
+
 #include <uart.h>
 
 #include "lcd.h"
