@@ -47,7 +47,7 @@ _FWDT(FWDTEN_OFF);
 _FGS(GCP_OFF);
 
 
-unsigned char buffer[] = "abcdefghijklmn\0";
+unsigned char buffer[500];
 unsigned int failures = 0;
 unsigned int ACK = 0x1;
 unsigned int NACK = 0x0;
@@ -89,6 +89,10 @@ int main(void) {
             n += 1 + uart2_recv(buffer + n);
         }
 
+        lcd_locate(0, 5);
+        lcd_printf("                 ");
+        lcd_locate(0, 5);
+
         set_timer1(0); // ignored = 1000ms*10^-3 * 12.8Mhz*10^6 * 1/256prescaler
 
         //        set_timer1(50000);
@@ -99,7 +103,7 @@ int main(void) {
         if (*(buffer) != 0x0) {
             // start byte is incorrect
             lcd_locate(0, 4);
-            lcd_printf("ISB");
+            lcd_printf("IFB");
             failures++;
             uart2_send_8(NACK);
             disableTimer();
@@ -125,7 +129,7 @@ int main(void) {
 
 
         // check for extra byte
-        __delay_ms(50); // wait multiple 9600 byte periods
+        //        __delay_ms(50); // wait multiple 9600 byte periods
         //         n += 1 +  uart2_recv(buffer + n);
 
         if ((crc_local != 256 * (uint16_t) buffer[1] + buffer[2]) /* || 0x00 != buffer[0] */) {
@@ -147,10 +151,37 @@ int main(void) {
     }
 }
 
+int flip1 = 0;
+int changes = 0;
+
 void __attribute__((__interrupt__)) _T1Interrupt(void) {
     lcd_locate(0, 5);
     lcd_printf("INTR");
-        lcd_locate(0, 5);
+    lcd_locate(0, 5);
+    flip1 = 1 - flip1;
+    if (flip1) {
+        SETLED(LED4_PORT);
+        Nop();
+    } else {
+        CLEARLED(LED4_PORT);
+        Nop();
+    }
+
+    if (++changes > 3) {
+        CLEARBIT(IFS0bits.T1IF);
+        TMR1 = 00;
+
+        changes = 0;
+        IFS0bits.T1IF = 1; // Set Timer1 Interrupt Flag
+        IEC0bits.T1IE = 0; // Disable Timer1 interrupt
+        T1CONbits.TON = 0; // Stop Timer
+        return;
+    }
+    CLEARBIT(IFS0bits.T1IF);
+    return;
+    lcd_locate(0, 5);
+    lcd_printf("INTR");
+    lcd_locate(0, 5);
 
 
     //        failures++;
@@ -159,6 +190,7 @@ void __attribute__((__interrupt__)) _T1Interrupt(void) {
 }
 
 void disableTimer() {
+    return;
     TMR1 = 00;
     //    T2CONbits.TON = 0; //disable timer
     //    SETBIT(IFS0bits.T2IF); // set Timer1 Interrupt Flag - don't interrupt, we're done here
