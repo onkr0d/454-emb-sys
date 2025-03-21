@@ -158,11 +158,11 @@ section                    address   length (PC units)   length (bytes) (dec)
 -------                    -------   -----------------   --------------------
 .text                        0x200              0x122e          0x1b45  (6981)
 .const                      0x142e                0x48            0x6c  (108)
-.text                       0x1476               0x588           0x84c  (2124)
-.dinit                      0x19fe                0xd6           0x141  (321)
-.text                       0x1ad4               0x11a           0x1a7  (423)
+.text                       0x1476               0x582           0x843  (2115)
+.dinit                      0x19f8                0xd6           0x141  (321)
+.text                       0x1ace               0x11a           0x1a7  (423)
 
-                 Total "program" memory used (bytes):         0x26e5  (9957) 3%
+                 Total "program" memory used (bytes):         0x26dc  (9948) 3%
 
 
 "data" Memory  [Origin = 0x800, Length = 0x7800]
@@ -301,12 +301,12 @@ External Symbols in Program Memory (by address):
                   0x001786                  _gotoPosition
                   0x0017a8                  _gotoLine
                   0x0017d4                  _main
-                  0x0019f0                  _disableTimer
-                  0x001ad4                  _uart2_init
-                  0x001b20                  _uart2_send_8
-                  0x001b48                  _uart2_recv
-                  0x001b70                  _crc_update
-                  0x001bb0                  _set_timer1
+                  0x0019ea                  _disableTimer
+                  0x001ace                  _uart2_init
+                  0x001b1a                  _uart2_send_8
+                  0x001b42                  _uart2_recv
+                  0x001b6a                  _crc_update
+                  0x001baa                  _set_timer1
                   0xf80004                  __FGS.sec
 
 External Symbols in Program Memory (by name):
@@ -346,8 +346,8 @@ External Symbols in Program Memory (by name):
                   0x001504                  _backLight
                   0x001580                  _changeBaud
                   0x0014e2                  _clearLCD
-                  0x001b70                  _crc_update
-                  0x0019f0                  _disableTimer
+                  0x001b6a                  _crc_update
+                  0x0019ea                  _disableTimer
                   0x001656                  _drawBox
                   0x001518                  _drawCircle
                   0x00172c                  _drawData
@@ -373,16 +373,16 @@ External Symbols in Program Memory (by name):
                   0x001710                  _reverseColor
                   0x0014f0                  _setDebug
                   0x0015b4                  _setFontMode
-                  0x001bb0                  _set_timer1
+                  0x001baa                  _set_timer1
                   0x0007d0                  _strchr
                   0x000ff8                  _strlen
                   0x00153e                  _toggleCRLF
                   0x0015a6                  _toggleFont
                   0x001682                  _togglePixel
                   0x00171e                  _toggleSplash
-                  0x001ad4                  _uart2_init
-                  0x001b48                  _uart2_recv
-                  0x001b20                  _uart2_send_8
+                  0x001ace                  _uart2_init
+                  0x001b42                  _uart2_recv
+                  0x001b1a                  _uart2_send_8
                   0x00161a                  _uploadSprite
                   0x000d84                  fclose.XX_o:_closeall
                   0x00035c                  printf_cdnopsuxX.XXo:_prout
@@ -556,7 +556,7 @@ __FSS
 
 __FGS             0xf80004          0x2
  *(__FGS.sec*)
- __FGS.sec        0xf80004          0x2 /CW/_FGSp«Ó
+ __FGS.sec        0xf80004          0x2 /CW/_FGS`«á
                   0xf80004                  _FGS.sec
 
 __FOSCSEL         0xf80006          0x2
@@ -1925,7 +1925,7 @@ LOAD /opt/microchip/xc16/v1.70/bin/bin/../../lib/libm-coff.a
 LOAD /opt/microchip/xc16/v1.70/bin/bin/../../lib/liblega-c-coff.a
 END GROUP
 OUTPUT(dist/default/production/Lab3.X.production.cof coff-pic30)
-LOAD /CW/_FGSp«Ó
+LOAD /CW/_FGS`«á
 LOAD jump_table
 LOAD data_init
 LOAD default_isr
@@ -2070,7 +2070,7 @@ __c30_signature
 .const              0x942e         0x48 load address 0x00142e  
  .const             0x942e         0x48 build/default/production/main.o
 
-.text             0x001476        0x588
+.text             0x001476        0x582
  .text            0x001476        0x35e ../All_headers_misc/lcd.a(lcd.o)
                   0x001476                  lcd_initialize
                   0x00148a                  lcd_send
@@ -2097,19 +2097,19 @@ __c30_signature
                   0x00172c                  drawData
                   0x001786                  gotoPosition
                   0x0017a8                  gotoLine
- .text            0x0017d4        0x22a build/default/production/main.o
+ .text            0x0017d4        0x224 build/default/production/main.o
                   0x0017d4                  main
-                  0x0019f0                  disableTimer
+                  0x0019ea                  disableTimer
 
-.dinit            0x0019fe         0xd6
- .dinit           0x0019fe         0xd6 data_init
+.dinit            0x0019f8         0xd6
+ .dinit           0x0019f8         0xd6 data_init
 
-.text             0x001ad4        0x11a
- .text            0x001ad4         0x9c build/default/production/uart.o
-                  0x001ad4                  uart2_init
-                  0x001b20                  uart2_send_8
-                  0x001b48                  uart2_recv
- .text            0x001b70         0x40 build/default/production/crc16.o
-                  0x001b70                  crc_update
- .text            0x001bb0         0x3e build/default/production/timer.o
-                  0x001bb0                  set_timer1
+.text             0x001ace        0x11a
+ .text            0x001ace         0x9c build/default/production/uart.o
+                  0x001ace                  uart2_init
+                  0x001b1a                  uart2_send_8
+                  0x001b42                  uart2_recv
+ .text            0x001b6a         0x40 build/default/production/crc16.o
+                  0x001b6a                  crc_update
+ .text            0x001baa         0x3e build/default/production/timer.o
+                  0x001baa                  set_timer1

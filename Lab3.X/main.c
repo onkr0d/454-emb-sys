@@ -140,7 +140,7 @@ int main(void) {
             lcd_locate(0, 4);
             lcd_printf("IFB");
             failures++;
-            uart2_send_8(NACK);
+//            uart2_send_8(NACK);
             disableTimer();
             continue;
         }
