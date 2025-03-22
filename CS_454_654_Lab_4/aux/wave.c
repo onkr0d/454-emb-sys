@@ -31,7 +31,7 @@ HANDLE init_DAQ(u3CalibrationInfo * caliInfo)
 	 hDevice = openUSBConnection( -1 );
 
 	/* Invoke getCalibrationInfo function here */
-	 getCalibrationInfo( hDevice, caliInfo );
+	 printf( "   %d  \n" , getCalibrationInfo( hDevice, caliInfo ) ) ;
 	return hDevice;
 }
 
@@ -47,13 +47,14 @@ int main(int argc, char **argv)
 	newhandle = init_DAQ( &HcaliInfo);
 printf( " %d \n" , (int) newhandle ) ;
 	int n;
+	int state;
+	state = 0;
 	while(1)
 	{
-	for (n=0;;n++<1000);
-		eDO( newhandle, 1 , 2 , 0 );
-	for (n=0;;n++<1000);
-		eDO( newhandle, 1 , 2 , 0 );
-}
+	    eDO( newhandle, 1 , 2 , state );
+	    usleep(500000);
+	    state = 1 - state;
+	}
 	/* Provide prompt to the user for a voltage range between 0
 	 * and 5 V. Require a new set of inputs if an invalid range
 	 * has been entered. */
