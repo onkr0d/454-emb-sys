@@ -3,8 +3,6 @@
 /*   CS-454/654 Embedded Systems Development        */
 /*   Instructor: Renato Mancuso <rmancuso@bu.edu>   */
 /*   Boston University                              */
-/*                                                  */
-/*   Description: template file for digital and     */
 /*                analog square wave generation     */
 /*                via the LabJack U3-LV 
 USB DAQ     */
@@ -15,6 +13,7 @@ USB DAQ     */
 #include <unistd.h>
 #include <stdlib.h>
 #include <time.h>
+#include <stdio.h>
 
 u3CalibrationInfo HcaliInfo ;
 
@@ -31,7 +30,7 @@ HANDLE init_DAQ(u3CalibrationInfo * caliInfo)
 	 hDevice = openUSBConnection( -1 );
 
 	/* Invoke getCalibrationInfo function here */
-	 printf( "   %d  \n" , getCalibrationInfo( hDevice, caliInfo ) ) ;
+	 printf( "   %ld  \n" , getCalibrationInfo( hDevice, caliInfo ) ) ;
 	return hDevice;
 }
 
@@ -45,21 +44,28 @@ int main(int argc, char **argv)
 	/* Invoke init_DAQ and handle errors if needed */
 
 	newhandle = init_DAQ( &HcaliInfo);
-printf( " %d \n" , (int) newhandle ) ;
+	printf( " %d \n" , (int) newhandle ) ;
 	int n;
 	int state;
 	state = 0;
-	while(1)
-	{
-	    eDO( newhandle, 1 , 2 , state );
-	    usleep(500000);
-	    state = 1 - state;
-	}
 	/* Provide prompt to the user for a voltage range between 0
 	 * and 5 V. Require a new set of inputs if an invalid range
 	 * has been entered. */
+	 
+ 	while(1)
+	{
+	    eDO( newhandle, 1 , 2 , state );
+	    eDAC( newhandle, &HcaliInfo , 1, (long) 0, (double) 3 * state , (long) 0, (long) 0, (long) 0);
+	    usleep(50000);
+	    state = 1 - state;
+	}
 	
-	
+	double v_low;
+	double v_high;
+	do {
+	printf("Enter desired voltage range between 0 and 5 V: ");
+	scanf("%lf %lf", &v_low, &v_high);
+	} while (v_low < 0 || v_high > 5 || v_low >= v_high);
 	
 	/* Compute the maximum resolutiuon of the CLOCK_REALTIME
 	 * system clock and output the theoretical maximum frequency
@@ -67,6 +73,11 @@ printf( " %d \n" , (int) newhandle ) ;
 	
 	/* Provide prompt to the user to input a desired square wave
 	 * frequency in Hz. */
+	double freq;
+	do {
+	printf("Enter desired frequency in Hz: ");
+	scanf("%lf", &freq);
+	} while (freq <= 0 || freq > 500); //Arbitary range for now
 
 	/* Program a timer to deliver a SIGRTMIN signal, and the
 	 * corresponding signal handler to output a square wave on
@@ -75,11 +86,14 @@ printf( " %d \n" , (int) newhandle ) ;
 	/* The square wave generated on the DAC0 analog pin should
 	 * have the voltage range specified by the user in the step
 	 * above. */
+	
+
 
 	/* Display a prompt to the user such that if the "exit"
 	 * command is typed, the USB DAQ is released and the program
 	 * is terminated. */
 	
+	closeUSBConnection( newhandle );
 	return EXIT_SUCCESS;
 }
 
