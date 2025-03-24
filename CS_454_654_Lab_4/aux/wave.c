@@ -15,6 +15,7 @@ USB DAQ     */
 #include <time.h>
 #include <stdio.h>
 #include <signal.h>
+#include <errno.h>
 
 u3CalibrationInfo HcaliInfo ;
 
@@ -58,9 +59,40 @@ int main(int argc, char **argv)
 	int n;
 
 
+	timer_t timer1;
+	
+	printf( "  %d   \n"  ,  timer_create( CLOCK_REALTIME, NULL, &timer1 ) ) ; 
+
+
+	struct itimerspec timer1_time ;
+	
+	timer1_time.it_value.tv_sec = 0;
+	timer1_time.it_value.tv_nsec = 50 * (long) 1000 * 1000 ;
+	timer1_time.it_value.tv_sec = 0;
+	timer1_time.it_value.tv_nsec = 50 * (long) 1000 * 1000 ;
+
+	struct sigaction actionT1 ;
+	
+	memset( &actionT1 , 0 , sizeof( actionT1 ) ) ;
+	
+	actionT1.sa_handler = hander_timer1 ;
+	
+//	sigaction( SIGALRM, &actionT1 , NULL ) ;
+	
+	printf(  "  %ld   \n"  , 	timer1_time.it_value.tv_sec ) ;
+	printf(  "   %d  \n"  , timer_settime( timer1 , 0 , &timer1_time , NULL ) ) ;
+	printf(  "  %d  \n"  , errno ) ;
+
+//	sigaction( SIGALRM, &actionT1 , NULL ) ;
+
+
+
+
+
+
 	/* Provide prompt to the user for a voltage range between 0
 	 * and 5 V. Require a new set of inputs if an invalid range
-	 * has been entered. */
+	 * has beenls -al entered. */
 	 
  	while(1)
 	{
@@ -93,29 +125,29 @@ int main(int argc, char **argv)
 	 * corresponding signal handler to output a square wave on
 	 * BOTH digital output pin FIO2 and analog pin DAC0. */
 	 
-	timer_t timer1;
-	
-	timer_create( CLOCK_REALTIME, NULL, &timer1 ); 
-
-
-	struct timerspec timer1_time ;
-	
-	timer1_time.it_value.tv_sec = 0;
-	timer1_time.it_value.tv_nsec = 50 * (long) 1000 * 1000;
-	timer1_time.it_value.tv_sec = 0;
-	timer1_time . it_value.tv_nsec = 50 * (long) 1000 * 1000;;
-	
-	struct sigaction actionT1 ;
-	
-	memset( &actionT1 , 0 , sizeof( actionT1 ) ) ;
-	
-	actionT1.sa_handler = hander_timer1 ;
-	
+//	timer_t timer1;
+//	
+//	timer_create( CLOCK_REALTIME, NULL, &timer1 ); 
+//
+//
+//	struct itimerspec timer1_time ;
+//	
+//	timer1_time.it_value.tv_sec = 0;
+//	timer1_time.it_value.tv_nsec = 50 * (long) 1000 * 1000;
+//	timer1_time.it_value.tv_sec = 0;
+//	timer1_time . it_value.tv_nsec = 50 * (long) 1000 * 1000;;
+//	
+//	struct sigaction actionT1 ;
+//	
+//	memset( &actionT1 , 0 , sizeof( actionT1 ) ) ;
+//	
+//	actionT1.sa_handler = hander_timer1 ;
+//	
 //	sigaction( SIGALRM, &actionT1 , NULL ) ;
-	
-	timer_settime( timer1, 0, &timer1_time, NULL);
-
-	sigaction( SIGALRM, &actionT1 , NULL ) ;
+//	
+//	timer_settime( timer1, 0, &timer1_time, NULL);
+//
+//	sigaction( SIGALRM, &actionT1 , NULL ) ;
 
 	/* The square wave generated on the DAC0 analog pin should
 	 * have the voltage range specified by the user in the step
