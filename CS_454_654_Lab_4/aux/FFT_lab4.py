@@ -55,7 +55,7 @@ def plotFFT(xf, yf, extra_label=""):
 
 ### PART 0: Simple signal at 5000 Hz ###
 # Generate time axis for a 5000 Hz sampled signal between 0 and 2 seconds
-fc = 1.0
+fc = 10 * 1000
 Tc = 1/fc
 time_start = 0.0
 time_end = 10.0
