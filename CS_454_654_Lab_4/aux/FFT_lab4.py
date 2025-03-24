@@ -63,7 +63,7 @@ N = int( (time_end - time_start) / Tc )
 t = np.linspace(time_start, time_end, N, endpoint=False)
 
 # Generate sampled signal
-s = 0.0 + 5.0 * ( 0 < np.sin(2 * np.pi * 5 * t) )
+s = 0.0 + 5.0 * ( 0 < np.sin(2 * np.pi * 1 * t) )
 
 xf, yf = getFFT(s, fc)
 plotSignal(t, s, "Simple signal: $s(t) = 1 + 0.8\sin(2\pi5t)$")

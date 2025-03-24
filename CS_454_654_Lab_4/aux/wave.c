@@ -41,8 +41,15 @@ HANDLE newhandle;
 int state = 0;
 
 void hander_timer1(int signum) {
-  eDO(newhandle, 1, 2, state);
-  printf("  help!  \n");
+  eDO(newhandle, 1, 2, state  = 1 - state );
+//  printf("  help!  \n");
+}
+
+void handler_timer2(int signum ) {
+	eDAC(newhandle, &HcaliInfo, 1, (long)0, (double)3 * state, (long)0,
+    (long)0, (long)0);
+  
+  
 }
 
 int main(int argc, char **argv) {
@@ -55,11 +62,6 @@ int main(int argc, char **argv) {
    * and 5 V. Require a new set of inputs if an invalid range
    * has beenls -al entered. */
 
-  /*  while (1) {
-      //	    eDO( newhandle, 1 , 2 , state );
-      eDAC(newhandle, &HcaliInfo, 1, (long)0, (double)3 * state, (long)0,
-    (long)0, (long)0); usleep(50000); state = 1 - state;
-    } */
 
   double v_low;
   double v_high;
@@ -83,6 +85,9 @@ int main(int argc, char **argv) {
   /* Program a timer to deliver a SIGRTMIN signal, and the
    * corresponding signal handler to output a square wave on
    * BOTH digital output pin FIO2 and analog pin DAC0. */
+  /* The square wave generated on the DAC0 analog pin should
+   * have the voltage range specified by the user in the step
+   * above. */
   struct sigaction sa;
   memset(&sa, 0, sizeof(sa));
   sa.sa_handler = hander_timer1;
@@ -94,25 +99,59 @@ int main(int argc, char **argv) {
   sev.sigev_signo = SIGRTMIN;
 
   timer_t timer1;
-  if (timer_create(CLOCK_REALTIME, &sev, &timer1) == -1) {
-    perror("timer_create");
+
+	if (timer_create(CLOCK_REALTIME, &sev, &timer1) == -1)\
+	{    perror("timer_create");
     exit(EXIT_FAILURE);
   }
 
   struct itimerspec timer1_time;
   timer1_time.it_value.tv_sec = 0;
-  timer1_time.it_value.tv_nsec = (long)(0.5 * 1e9 / freq); // toggle every T/2
+  timer1_time.it_value.tv_nsec = (long) (0.5 * 1e9 / freq); // toggle every T/2
   timer1_time.it_interval.tv_sec = 0;
-  timer1_time.it_interval.tv_nsec = (long)(0.5 * 1e9 / freq);
+  timer1_time.it_interval.tv_nsec = (long)( 0.5 * 1e9 / freq);
 
   if (timer_settime(timer1, 0, &timer1_time, NULL) == -1) {
     perror("timer_settime");
     exit(EXIT_FAILURE);
   }
+  
+  struct sigaction sa2;
+  memset(&sa, 0, sizeof(sa2));
+  sa2.sa_handler = handler_timer2;
+  sigaction(SIGRTMAX, &sa2, NULL);
+  
+  struct sigevent sev2;
+  memset(&sev2, 0, sizeof(sev2));
+  sev2.sigev_notify = SIGEV_SIGNAL;
+  sev2.sigev_signo = SIGRTMAX;
 
-  /* The square wave generated on the DAC0 analog pin should
-   * have the voltage range specified by the user in the step
-   * above. */
+  timer_t timer2;
+  if (timer_create(CLOCK_REALTIME, &sev2, &timer2) == -1) {
+    perror("timer_create");
+    exit(EXIT_FAILURE);
+  }
+
+  struct itimerspec timer2_time;
+  timer2_time.it_value.tv_sec = 0;
+  timer2_time.it_value.tv_nsec = (long) (0.5 * 1e9 / freq);
+  timer2_time.it_interval.tv_sec = 0;
+  timer2_time.it_interval.tv_nsec = (long)( 0.5 * 1e9 / freq);
+
+  if (timer_settime(timer2, 0, &timer2_time, NULL) == -1) {
+    perror("timer_settime");
+    exit(EXIT_FAILURE);
+  }
+  
+ 		while(1);
+    while (1) {
+      	    eDO( newhandle, 1 , 2 , state );
+      eDAC(newhandle, &HcaliInfo, 1, (long)0, (double)3 * state, (long)0,
+    (long)0, (long)0); usleep(50000); state = 1 - state;
+    } 
+
+ 
+
 
   /* Display a prompt to the user such that if the "exit"
    * command is typed, the USB DAQ is released and the program
