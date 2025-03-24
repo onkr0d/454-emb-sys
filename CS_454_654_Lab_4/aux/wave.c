@@ -38,17 +38,20 @@ HANDLE init_DAQ(u3CalibrationInfo *caliInfo) {
 struct timespec res;
 HANDLE newhandle;
 
+double v_low;
+double v_high;
+
 int state = 0;
 
 void handler_timer1(int signum, siginfo_t *info, void *context) {
   eDO(newhandle, 1, 2, state  = 1 - state );
-  printf("  help!  \n");
+//  printf("  help!  \n");
 }
 
 void handler_timer2(int signum, siginfo_t *info, void *context) {
-	eDAC(newhandle, &HcaliInfo, 1, (long)0, (double)3 * state, (long)0,
+	eDAC(newhandle, &HcaliInfo, 1, (long)0, (double) ( state ? v_high : v_low ) , (long)0,
     (long)0, (long)0);
-    printf("  help2!  \n");
+//    printf("  help2!  \n");
   
 }
 
@@ -63,8 +66,6 @@ int main(int argc, char **argv) {
    * has beenls -al entered. */
 
 
-  double v_low;
-  double v_high;
   do {
     printf("Enter desired voltage range between 0 and 5 V: ");
     scanf("%lf %lf", &v_low, &v_high);
@@ -107,7 +108,7 @@ int main(int argc, char **argv) {
 
   struct itimerspec timer1_time;
   timer1_time.it_value.tv_sec = 0;
-  timer1_time.it_value.tv_nsec = (long) (0.5 * 1e9 / freq); // toggle every T/2
+  timer1_time.it_value.tv_nsec = (long) (0.25 * 1e9 / freq); // toggle every T/2
   timer1_time.it_interval.tv_sec = 0;
   timer1_time.it_interval.tv_nsec = (long)( 0.5 * 1e9 / freq);
 
@@ -117,8 +118,8 @@ int main(int argc, char **argv) {
   }
   
   struct sigaction sa2 = {0};
-  sa.sa_flags = SA_SIGINFO;
-  sa.sa_sigaction = handler_timer2;
+  sa2.sa_flags = SA_SIGINFO;
+  sa2.sa_sigaction = handler_timer2;
   sigaction(SIGRTMAX, &sa2, NULL);
   
   struct sigevent sev2;
