@@ -40,15 +40,15 @@ HANDLE newhandle;
 
 int state = 0;
 
-void hander_timer1(int signum) {
+void handler_timer1(int signum, siginfo_t *info, void *context) {
   eDO(newhandle, 1, 2, state  = 1 - state );
-//  printf("  help!  \n");
+  printf("  help!  \n");
 }
 
-void handler_timer2(int signum ) {
+void handler_timer2(int signum, siginfo_t *info, void *context) {
 	eDAC(newhandle, &HcaliInfo, 1, (long)0, (double)3 * state, (long)0,
     (long)0, (long)0);
-  
+    printf("  help2!  \n");
   
 }
 
@@ -88,9 +88,9 @@ int main(int argc, char **argv) {
   /* The square wave generated on the DAC0 analog pin should
    * have the voltage range specified by the user in the step
    * above. */
-  struct sigaction sa;
-  memset(&sa, 0, sizeof(sa));
-  sa.sa_handler = hander_timer1;
+  struct sigaction sa = {0};
+  sa.sa_flags = SA_SIGINFO;
+  sa.sa_sigaction = handler_timer1;
   sigaction(SIGRTMIN, &sa, NULL);
 
   struct sigevent sev;
@@ -116,9 +116,9 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
   
-  struct sigaction sa2;
-  memset(&sa, 0, sizeof(sa2));
-  sa2.sa_handler = handler_timer2;
+  struct sigaction sa2 = {0};
+  sa.sa_flags = SA_SIGINFO;
+  sa.sa_sigaction = handler_timer2;
   sigaction(SIGRTMAX, &sa2, NULL);
   
   struct sigevent sev2;
