@@ -31,7 +31,10 @@ HANDLE init_DAQ(u3CalibrationInfo *caliInfo) {
   hDevice = openUSBConnection(-1);
 
   /* Invoke getCalibrationInfo function here */
-  printf("   %ld  \n", getCalibrationInfo(hDevice, caliInfo));
+  // printf("   %ld  \n",
+  getCalibrationInfo(hDevice, caliInfo)
+  // )
+  ;
   return hDevice;
 }
 
@@ -58,7 +61,7 @@ int main(int argc, char **argv) {
   /* Invoke init_DAQ and handle errors if needed */
 
   newhandle = init_DAQ(&HcaliInfo);
-  printf(" %d \n", (int)newhandle);
+//  printf(" %d \n", (int)newhandle);
   int n;
   /* Provide prompt to the user for a voltage range between 0
    * and 5 V. Require a new set of inputs if an invalid range
@@ -72,6 +75,12 @@ int main(int argc, char **argv) {
   /* Compute the maximum resolutiuon of the CLOCK_REALTIME
    * system clock and output the theoretical maximum frequency
    * for a square wave */
+   
+   struct timespec res_period;
+   clock_getres( CLOCK_REALTIME	, &res_period ) ; 
+   printf (  "   %f  \n"  , 1.0e9 / (2.0 * res_period.tv_nsec ) ) ;
+   
+
 
   /* Provide prompt to the user to input a desired square wave
    * frequency in Hz. */
@@ -106,14 +115,11 @@ int main(int argc, char **argv) {
 
   struct itimerspec timer1_time;
   timer1_time.it_value.tv_sec = 0;
-  timer1_time.it_value.tv_nsec = (long)(0.25 * 1e9 / freq); // toggle every T/2
+  timer1_time.it_value.tv_nsec = (long)(0.25 * 1e9 / freq);
   timer1_time.it_interval.tv_sec = 0;
   timer1_time.it_interval.tv_nsec = (long)(0.5 * 1e9 / freq);
 
-  if (timer_settime(timer1, 0, &timer1_time, NULL) == -1) {
-    perror("timer_settime");
-    exit(EXIT_FAILURE);
-  }
+ 
 
   struct sigaction sa2 = {0};
   sa2.sa_flags = SA_SIGINFO;
@@ -133,10 +139,17 @@ int main(int argc, char **argv) {
 
   struct itimerspec timer2_time;
   timer2_time.it_value.tv_sec = 0;
-  timer2_time.it_value.tv_nsec = (long)(0.5 * 1e9 / freq);
-  timer2_time.it_interval.tv_sec = 0;
-  timer2_time.it_interval.tv_nsec = (long)(0.5 * 1e9 / freq);
+  timer2_time.it_value.tv_nsec = ( long) (0.5 * 1e9 / freq) ;
+  timer2_time.it_interval.tv_sec = 0 ;
+  timer2_time.it_interval.tv_nsec = (long)(0.5 * 1e9 / freq) ;
 
+ 
+  if (timer_settime(timer1, 0, &timer1_time, NULL) == -1) {
+    perror("timer_settime");
+    exit(EXIT_FAILURE);
+  }
+ 
+ 
   if (timer_settime(timer2, 0, &timer2_time, NULL) == -1) {
     perror("timer_settime");
     exit(EXIT_FAILURE);
@@ -148,7 +161,7 @@ int main(int argc, char **argv) {
     int ret;
     do {
       ret = scanf("%s", input);
-    } while (ret == -1 && errno == EINTR); // Re-try on interrupt
+    } while (ret == -1 && errno == EINTR);
 
     if (ret > 0 && strcmp(input, "exit") == 0)
       break;
