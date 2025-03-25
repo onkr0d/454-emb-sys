@@ -56,7 +56,6 @@ def plotFFT(xf, yf, extra_label=""):
 
 ### PART 0: Simple signal at 5000 Hz ###
 # Generate time axis for a 5000 Hz sampled signal between 0 and 2 seconds
-<<<<<<< HEAD
 fc = 5000.0
 Tc = 1 / fc
 time_start = 0.0
@@ -66,17 +65,6 @@ t = np.linspace(time_start, time_end, N, endpoint=False)
 
 # Generate sampled signal
 s = 1 + 0.8 * np.sin(2 * np.pi * 5 * t)
-=======
-fc = 10 * 1000
-Tc = 1/fc
-time_start = 0.0
-time_end = 10.0
-N = int( (time_end - time_start) / Tc )
-t = np.linspace(time_start, time_end, N, endpoint=False)
-
-# Generate sampled signal
-s = 0.0 + 5.0 * ( 0 < np.sin(2 * np.pi * 1 * t) )
->>>>>>> 390547077de2aac97ab1249c97f588894aa42eff
 
 xf, yf = getFFT(s, fc)
 plotSignal(t, s, "Simple signal: $s(t) = 1 + 0.8\sin(2\pi5t)$")
@@ -88,32 +76,7 @@ fc = 5000.0
 Tc = 1 / fc
 time_start = 0.0
 time_end = 2.0
-<<<<<<< HEAD
 N = int((time_end - time_start) / Tc)
-=======
-N = int( (time_end - time_start) / Tc )
-t = np.linspace(time_start, time_end, N, endpoint=False)
-
-# Generate sampled signal
-s = 1 + 0.8*np.sin(2 * np.pi * 5 * t)
-
-# Generate sampled noise
-n = 0.4*np.sin(2 * np.pi * 30 * t) + 0.2*np.sin(2* np.pi * 43 * t);      
-
-plotSignal(t, s, "Simple signal (no noise)")
-
-xf, yf = getFFT(s+n, fc)
-plotSignal(t, s+n, "Simple signal + noise")
-plotFFT(xf, yf, "of signal + noise")
-
-### PART 2: Simple signal at 50 Hz ###
-# Generate time axis for a 50 Hz sampled signal between 0 and 1 seconds
-fc = 50.0
-Tc = 1/fc
-time_start = 0.0
-time_end = 2.0
-N = int( (time_end - time_start) / Tc )
->>>>>>> 390547077de2aac97ab1249c97f588894aa42eff
 t = np.linspace(time_start, time_end, N, endpoint=False)
 
 # Generate sampled signal
