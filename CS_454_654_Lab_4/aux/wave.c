@@ -142,11 +142,15 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
 
-  char input[10];
+  char input[32];
   while (1) {
     printf("Type 'exit' to quit the program: ");
-    scanf("%s", input);
-    if (strcmp(input, "exit") == 0)
+    int ret;
+    do {
+      ret = scanf("%s", input);
+    } while (ret == -1 && errno == EINTR); // Re-try on interrupt
+
+    if (ret > 0 && strcmp(input, "exit") == 0)
       break;
   }
 
