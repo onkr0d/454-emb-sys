@@ -44,15 +44,14 @@ double v_high;
 int state = 0;
 
 void handler_timer1(int signum, siginfo_t *info, void *context) {
-  eDO(newhandle, 1, 2, state  = 1 - state );
-//  printf("  help!  \n");
+  eDO(newhandle, 1, 2, state = 1 - state);
+  //  printf("  help!  \n");
 }
 
 void handler_timer2(int signum, siginfo_t *info, void *context) {
-	eDAC(newhandle, &HcaliInfo, 1, (long)0, (double) ( state ? v_high : v_low ) , (long)0,
-    (long)0, (long)0);
-//    printf("  help2!  \n");
-  
+  eDAC(newhandle, &HcaliInfo, 1, (long)0, (double)(state ? v_high : v_low),
+       (long)0, (long)0, (long)0);
+  //    printf("  help2!  \n");
 }
 
 int main(int argc, char **argv) {
@@ -64,7 +63,6 @@ int main(int argc, char **argv) {
   /* Provide prompt to the user for a voltage range between 0
    * and 5 V. Require a new set of inputs if an invalid range
    * has beenls -al entered. */
-
 
   do {
     printf("Enter desired voltage range between 0 and 5 V: ");
@@ -101,27 +99,27 @@ int main(int argc, char **argv) {
 
   timer_t timer1;
 
-	if (timer_create(CLOCK_REALTIME, &sev, &timer1) == -1)\
-	{    perror("timer_create");
+  if (timer_create(CLOCK_REALTIME, &sev, &timer1) == -1) {
+    perror("timer_create");
     exit(EXIT_FAILURE);
   }
 
   struct itimerspec timer1_time;
   timer1_time.it_value.tv_sec = 0;
-  timer1_time.it_value.tv_nsec = (long) (0.25 * 1e9 / freq); // toggle every T/2
+  timer1_time.it_value.tv_nsec = (long)(0.25 * 1e9 / freq); // toggle every T/2
   timer1_time.it_interval.tv_sec = 0;
-  timer1_time.it_interval.tv_nsec = (long)( 0.5 * 1e9 / freq);
+  timer1_time.it_interval.tv_nsec = (long)(0.5 * 1e9 / freq);
 
   if (timer_settime(timer1, 0, &timer1_time, NULL) == -1) {
     perror("timer_settime");
     exit(EXIT_FAILURE);
   }
-  
+
   struct sigaction sa2 = {0};
   sa2.sa_flags = SA_SIGINFO;
   sa2.sa_sigaction = handler_timer2;
   sigaction(SIGRTMAX, &sa2, NULL);
-  
+
   struct sigevent sev2;
   memset(&sev2, 0, sizeof(sev2));
   sev2.sigev_notify = SIGEV_SIGNAL;
@@ -135,29 +133,28 @@ int main(int argc, char **argv) {
 
   struct itimerspec timer2_time;
   timer2_time.it_value.tv_sec = 0;
-  timer2_time.it_value.tv_nsec = (long) (0.5 * 1e9 / freq);
+  timer2_time.it_value.tv_nsec = (long)(0.5 * 1e9 / freq);
   timer2_time.it_interval.tv_sec = 0;
-  timer2_time.it_interval.tv_nsec = (long)( 0.5 * 1e9 / freq);
+  timer2_time.it_interval.tv_nsec = (long)(0.5 * 1e9 / freq);
 
   if (timer_settime(timer2, 0, &timer2_time, NULL) == -1) {
     perror("timer_settime");
     exit(EXIT_FAILURE);
   }
-  
- 		while(1);
-    while (1) {
-      	    eDO( newhandle, 1 , 2 , state );
-      eDAC(newhandle, &HcaliInfo, 1, (long)0, (double)3 * state, (long)0,
-    (long)0, (long)0); usleep(50000); state = 1 - state;
-    } 
 
- 
-
+  char input[10];
+  while (1) {
+    printf("Type 'exit' to quit the program: ");
+    scanf("%s", input);
+    if (strcmp(input, "exit") == 0)
+      break;
+  }
 
   /* Display a prompt to the user such that if the "exit"
    * command is typed, the USB DAQ is released and the program
    * is terminated. */
-
+  timer_delete(timer1);
+  timer_delete(timer2);
   closeUSBConnection(newhandle);
   return EXIT_SUCCESS;
 }
