@@ -65,6 +65,9 @@
       <ICD3PlatformTool>
         <property key="firmware.download.all" value="false"/>
       </ICD3PlatformTool>
+      <Tool>
+        <property key="firmware.download.all" value="false"/>
+      </Tool>
     </conf>
   </confs>
 </configurationDescriptor>

@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
    
    struct timespec res_period;
    clock_getres( CLOCK_REALTIME	, &res_period ) ; 
-   printf (  "   %f  \n"  , 1.0e9 / (2.0 * res_period.tv_nsec ) ) ;
+   printf (  " Max frequency:  %g  \n"  , 1.0e9 / (2.0 * res_period.tv_nsec ) ) ;
    
 
 
@@ -115,7 +115,8 @@ int main(int argc, char **argv) {
 
   struct itimerspec timer1_time;
   timer1_time.it_value.tv_sec = 0;
-  timer1_time.it_value.tv_nsec = (long)(0.25 * 1e9 / freq);
+//  timer1_time.it_value.tv_nsec = (long)(0.25 * 1e9 / freq);
+  timer1_time.it_value.tv_nsec =  3 *   ( 1000 * (long) 1000 );
   timer1_time.it_interval.tv_sec = 0;
   timer1_time.it_interval.tv_nsec = (long)(0.5 * 1e9 / freq);
 
@@ -139,21 +140,21 @@ int main(int argc, char **argv) {
 
   struct itimerspec timer2_time;
   timer2_time.it_value.tv_sec = 0;
-  timer2_time.it_value.tv_nsec = ( long) (0.5 * 1e9 / freq) ;
+  timer2_time.it_value.tv_nsec = ( 1000 * (long) 1000 );
   timer2_time.it_interval.tv_sec = 0 ;
-  timer2_time.it_interval.tv_nsec = (long)(0.5 * 1e9 / freq) ;
+  timer2_time.it_interval.tv_nsec = (long) (0.5 * 1e9 / freq) ;
 
  
+  if (timer_settime(timer2, 0 , &timer2_time, NULL) == -1) {
+    perror("timer_settime");
+    exit(EXIT_FAILURE);
+  }
+
   if (timer_settime(timer1, 0, &timer1_time, NULL) == -1) {
     perror("timer_settime");
     exit(EXIT_FAILURE);
   }
  
- 
-  if (timer_settime(timer2, 0, &timer2_time, NULL) == -1) {
-    perror("timer_settime");
-    exit(EXIT_FAILURE);
-  }
 
   char input[32];
   while (1) {
