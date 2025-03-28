@@ -100,26 +100,21 @@ int main() {
 
 
     
-    CLEARBIT(  T2CONbits.TON);
-
-    CLEARBIT(  T2CONbits.TCS);
-    CLEARBIT(  T2CONbits.TGATE);
-    
+   CLEARBIT(  T2CONbits.TON);
+   CLEARBIT(  T2CONbits.TCS);
+   CLEARBIT(  T2CONbits.TGATE);
    TMR2 = 0;
-   T2CONbits.TCKPS = 0b010;
-    
+   T2CONbits.TCKPS = 0b10;
    CLEARBIT(  IEC0bits.T2IE);
    CLEARBIT(  IEC0bits.T2IE);
-   PR2 = 4000;
-               
+   PR2 = 8000;  
    CLEARBIT(TRISDbits.TRISD7);
-   OC8R = 100;
-   OC8RS = 100;
-   OC8CONbits.OCM = 0b0110;
-   
+   OC8R = 0;
+   OC8RS = 0;
+   OC8CONbits.OCM = 0b110;
    SETBIT(T2CONbits.TON);
    
-   while(1);
+//   while(1);
    
    
    uint16_t x_val = 0 ;
@@ -137,9 +132,16 @@ int main() {
        CLEARBIT(AD2CON1bits.DONE); //MUST HAVE! clear conversion done bit
        y_val = ADC2BUF0; //return sample
 
-       lcd_locate(0, 1);
-       lcd_printf( "x:%X y:%X\n" ,x_val, y_val) ;
-       lcd_locate(0, 1);
+       lcd_locate(8,3);
+       lcd_printf("x:%X", x_val) ;
+       fflush(stdout);
+
+       
+       lcd_locate(8,4);
+       lcd_printf("y:%X", y_val);
+       fflush(stdout);
+
+       __delay_ms(50);
    };
 
     return 0;
