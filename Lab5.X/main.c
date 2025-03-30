@@ -17,6 +17,7 @@
 #include <uart.h>
 // #include "outcompare.h"
 
+#include <math.h>
 
 #include "lcd.h"
 #include "types.h"
@@ -112,8 +113,11 @@ int main() {
    CLEARBIT(  IEC0bits.T2IE);
    CLEARBIT(  IEC0bits.T2IE);
    PR2 = 4000;  
+   
+   
+   
    CLEARBIT(TRISDbits.TRISD6);
-   OC7R = 37;
+   OC7R = 3700;
    OC7RS = 3700;
    OC7CONbits.OCM = 0b110;
    SETBIT(T2CONbits.TON);
@@ -130,51 +134,138 @@ int main() {
 
    unsigned int holdBuffer = 0;
    unsigned int pressed = 0;
-   uint16_t x_val = 0 ;
-   uint16_t y_val = 0;
-   uint16_t x_snapshot = 0;
-   uint16_t y_snapshot = 0;
+   unsigned int press_count = 0;
+   uint16_t joystick_val = 0;
+   uint16_t x_min = 0;
+   uint16_t x_max = 0;
+   uint16_t y_min = 0;
+   uint16_t y_max = 0;
+
+   lcd_clear();
+   lcd_locate(0,0);
+   lcd_printf("Move X to MAX")
    while (1) {
-       AD2CHS0bits.CH0SA = 4; //set ADC to Sample AN4 pin
-       SETBIT(AD2CON1bits.SAMP); //start to sample
-       while(!AD2CON1bits.DONE); //wait for conversion to finish
-       CLEARBIT(AD2CON1bits.DONE); //MUST HAVE! clear conversion done bit
-       x_val = ADC2BUF0; //return sample
-       
-       AD2CHS0bits.CH0SA = 5; //set ADC to Sample AN5 pin
-       SETBIT(AD2CON1bits.SAMP); //start to sample
-       while(!AD2CON1bits.DONE); //wait for conversion to finish
-       CLEARBIT(AD2CON1bits.DONE); //MUST HAVE! clear conversion done bit
-       y_val = ADC2BUF0; //return sample
-       
-       if (BTN1_PRESSED()) {
-            // no point in increasing the buffer past 10, set to 20 here for fun
-            if (holdBuffer <= 20) {
-                holdBuffer++;
-            }
-            if (holdBuffer > 10 && !pressed) {
-
-
-                pressed = 1;
-            }
+       if (press_count < 2) {
+           // Read x-axis
+        AD2CHS0bits.CH0SA = 4; //set ADC to Sample AN4 pin
        } else {
-            holdBuffer = 0;
-            pressed = 0;
-            CLEARLED(LED1_PORT);
-            Nop();
+           // Read y-axis
+        AD2CHS0bits.CH0SA = 5; //set ADC to Sample AN5 pin
+       
+   
+       
        }
 
-       lcd_locate(8,3);
-       lcd_printf("x:%X", x_val) ;
-       fflush(stdout);
-
+      // Joystick value sampling code
+       SETBIT(AD2CON1bits.SAMP); //start to sample
+       while(!AD2CON1bits.DONE); //wait for conversion to finish
+       CLEARBIT(AD2CON1bits.DONE); //MUST HAVE! clear conversion done bit
+       joystick_val = ADC2BUF0;
+            
        
-       lcd_locate(8,4);
-       lcd_printf("y:%X", y_val);
-       fflush(stdout);
+       
+       /*  if (2 == press_count ) { 
+       
+       uint16_t xservo ;
+       
+       while (1) {
+       // Joystick value sampling code
+       SETBIT(AD2CON1bits.SAMP); //start to sample
+       while(!AD2CON1bits.DONE); //wait for conversion to finish
+       CLEARBIT(AD2CON1bits.DONE); //MUST HAVE! clear conversion done bit
+       joystick_val = ADC2BUF0;
+       
 
+   xservo = floor( joystick_val * (double) 240 / (x_max - x_min ) );
+   
+   OC7R = xservo ;
+   OC7RS = xservo ;
+   OC7CONbits.OCM = 0b110;
+   SETBIT(T2CONbits.TON);       
+
+
+       }
+      
+   }
+*/
+   
+   
+       // Show current joystick value
+       lcd_locate(0, 1);
+       lcd_printf("Value: %X", joystick_val);
+       
+       if (BTN1_PRESSED()) {
+           if (holdBuffer++ > 2) {
+               if (press_count == 0) {
+                   x_max = joystick_val;
+                   lcd_clear();
+                   lcd_locate(0,0);
+                   lcd_printf("Move X to MIN")
+               } else if (press_count == 1) {
+                    x_min = joystick_val;
+                    lcd_clear();
+                    lcd_locate(0,0);
+                    lcd_printf("Move Y to MAX")
+
+                    uint16_t xservo ;
+
+                    while (1) {
+                        // Joystick value sampling code
+                        SETBIT(AD2CON1bits.SAMP); //start to sample
+                        while(!AD2CON1bits.DONE); //wait for conversion to finish
+                        CLEARBIT(AD2CON1bits.DONE); //MUST HAVE! clear conversion done bit
+                        joystick_val = ADC2BUF0;
+
+
+                        xservo = floor( ( joystick_val - x_min) * (double) 240 / (x_max - x_min ) + 3580 );
+
+                        OC7R = xservo ;
+                        OC7RS = xservo ;
+                        OC7CONbits.OCM = 0b110;
+                        SETBIT(T2CONbits.TON);       
+
+                        y_min = joystick_val;
+                        //lcd_clear();
+                        lcd_locate(0,0);
+                        lcd_printf("   %d  ", joystick_val);
+                        // while(1) ;
+
+                        __delay_ms(50);  
+                    }
+               } else if (press_count == 2) {
+                   y_max = joystick_val;
+                   lcd_clear();
+                   lcd_locate(0,0);
+                   lcd_printf("Move y to MIN")
+               } else if (press_count = 3) {
+                   y_min = joystick_val;
+                   lcd_clear();
+                   lcd_locate(0,0);
+                   lcd_printf("Done reading.")
+                   break;
+               }
+               press_count++;
+               holdBuffer = 0;
+               __delay_ms(500);
+           }
+       } else {
+           holdBuffer = 0;
+       }
        __delay_ms(50);
    };
+   
+   
+    lcd_clear();
+    lcd_locate(0,0);
+    lcd_printf("x-min: %X", x_min);
+    lcd_locate(0,1);
+    lcd_printf("x-max: %X", x_max);
+    lcd_locate(0,2);
+    lcd_printf("y-min: %X", y_min);
+    lcd_locate(0,3);
+    lcd_printf("y-max: %X", y_max);
+    
+    while(1);
 
     return 0;
 }

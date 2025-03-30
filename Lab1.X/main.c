@@ -124,7 +124,11 @@ int main(){
         lcd_locate(0,3);
     }
     
+  	
+	/* Do nothing */
+	while(1){
 
+	}
     
     return 0;
 }
