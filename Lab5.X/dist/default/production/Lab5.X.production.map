@@ -153,10 +153,10 @@ section                    address   length (PC units)   length (bytes) (dec)
 -------                    -------   -----------------   --------------------
 .text                        0x200              0x1142          0x19e3  (6627)
 .const                      0x1342                 0xa             0xf  (15)
-.text                       0x134c               0x45a           0x687  (1671)
-.dinit                      0x17a6                0xc2           0x123  (291)
+.text                       0x134c               0x474           0x6ae  (1710)
+.dinit                      0x17c0                0xc2           0x123  (291)
 
-                 Total "program" memory used (bytes):         0x219c  (8604) 3%
+                 Total "program" memory used (bytes):         0x21c3  (8643) 3%
 
 
 "data" Memory  [Origin = 0x800, Length = 0x7800]
@@ -513,7 +513,7 @@ __FSS
 
 __FGS             0xf80004          0x2
  *(__FGS.sec*)
- __FGS.sec        0xf80004          0x2 /CW/_FGS`cþ
+ __FGS.sec        0xf80004          0x2 /CW/_FGSà1A
                   0xf80004                  _FGS.sec
 
 __FOSCSEL         0xf80006          0x2
@@ -1882,7 +1882,7 @@ LOAD /opt/microchip/xc16/v1.70/bin/bin/../../lib/libm-coff.a
 LOAD /opt/microchip/xc16/v1.70/bin/bin/../../lib/liblega-c-coff.a
 END GROUP
 OUTPUT(dist/default/production/Lab5.X.production.cof coff-pic30)
-LOAD /CW/_FGS`cþ
+LOAD /CW/_FGSà1A
 LOAD jump_table
 LOAD data_init
 LOAD default_isr
@@ -2001,7 +2001,7 @@ __c30_signature
 .const              0x9342          0xa load address 0x001342  
  .const             0x9342          0xa build/default/production/main.o
 
-.text             0x00134c        0x45a
+.text             0x00134c        0x474
  .text            0x00134c        0x35e ../All_headers_misc/lcd.a(lcd.o)
                   0x00134c                  lcd_initialize
                   0x001360                  lcd_send
@@ -2028,8 +2028,8 @@ __c30_signature
                   0x001602                  drawData
                   0x00165c                  gotoPosition
                   0x00167e                  gotoLine
- .text            0x0016aa         0xfc build/default/production/main.o
+ .text            0x0016aa        0x116 build/default/production/main.o
                   0x0016aa                  main
 
-.dinit            0x0017a6         0xc2
- .dinit           0x0017a6         0xc2 data_init
+.dinit            0x0017c0         0xc2
+ .dinit           0x0017c0         0xc2 data_init

@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <libpic30.h>
 #include <uart.h>
-#include "outcompare.h"
+// #include "outcompare.h"
 
 
 #include "lcd.h"
@@ -48,10 +48,16 @@ int main() {
     lcd_clear();
 
 
+    // LED setup
     CLEARBIT(LED1_TRIS); // Set Pin to Output
     CLEARBIT(LED2_TRIS); // Set Pin to Output
     CLEARBIT(LED3_TRIS); // Set Pin to Output
     CLEARBIT(LED4_TRIS); // Set Pin to Output
+    
+    // configuration of joystick registers according to Lab Manual 4.6.2, "Button #1 is located on PORTE PIN8..."
+    SETBIT(TRISEbits.TRISE8);
+    SETBIT(INTCON2bits.INT1EP);
+    SETBIT(AD1PCFGHbits.PCFG20);
 
     
 /*   
@@ -98,27 +104,36 @@ int main() {
     SETBIT(AD2CON1bits.ADON);
 
 
-
-    
-   CLEARBIT(  T2CONbits.TON);
+  CLEARBIT(  T2CONbits.TON);
    CLEARBIT(  T2CONbits.TCS);
    CLEARBIT(  T2CONbits.TGATE);
    TMR2 = 0;
    T2CONbits.TCKPS = 0b10;
    CLEARBIT(  IEC0bits.T2IE);
    CLEARBIT(  IEC0bits.T2IE);
-   PR2 = 8000;  
+   PR2 = 4000;  
+   CLEARBIT(TRISDbits.TRISD6);
+   OC7R = 37;
+   OC7RS = 3700;
+   OC7CONbits.OCM = 0b110;
+   SETBIT(T2CONbits.TON);
+    
+  
+    
+
    CLEARBIT(TRISDbits.TRISD7);
-   OC8R = 0;
-   OC8RS = 0;
+   OC8R = 3700;
+   OC8RS = 3700;
    OC8CONbits.OCM = 0b110;
    SETBIT(T2CONbits.TON);
-   
-//   while(1);
-   
-   
+  
+
+   unsigned int holdBuffer = 0;
+   unsigned int pressed = 0;
    uint16_t x_val = 0 ;
    uint16_t y_val = 0;
+   uint16_t x_snapshot = 0;
+   uint16_t y_snapshot = 0;
    while (1) {
        AD2CHS0bits.CH0SA = 4; //set ADC to Sample AN4 pin
        SETBIT(AD2CON1bits.SAMP); //start to sample
@@ -131,6 +146,23 @@ int main() {
        while(!AD2CON1bits.DONE); //wait for conversion to finish
        CLEARBIT(AD2CON1bits.DONE); //MUST HAVE! clear conversion done bit
        y_val = ADC2BUF0; //return sample
+       
+       if (BTN1_PRESSED()) {
+            // no point in increasing the buffer past 10, set to 20 here for fun
+            if (holdBuffer <= 20) {
+                holdBuffer++;
+            }
+            if (holdBuffer > 10 && !pressed) {
+
+
+                pressed = 1;
+            }
+       } else {
+            holdBuffer = 0;
+            pressed = 0;
+            CLEARLED(LED1_PORT);
+            Nop();
+       }
 
        lcd_locate(8,3);
        lcd_printf("x:%X", x_val) ;
