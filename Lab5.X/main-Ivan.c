@@ -52,19 +52,12 @@ void switchToXAxis(bool xAxis) {
     }
     // lol what if this was a ternary operator instead
 
-    SETBIT(AD2CON1bits.SAMP); //start to sample
-    while (!AD2CON1bits.DONE); //wait for conversion to finish
-    CLEARBIT(AD2CON1bits.DONE); //MUST HAVE! clear conversion done bit
+        SETBIT(AD2CON1bits.SAMP); //start to sample
+        while (!AD2CON1bits.DONE); //wait for conversion to finish
+        CLEARBIT(AD2CON1bits.DONE); //MUST HAVE! clear conversion done bit
 
 }
 
-int sampleJoystick() {
-    // Joystick value sampling code
-    SETBIT(AD2CON1bits.SAMP); //start to sample
-    while (!AD2CON1bits.DONE); //wait for conversion to finish
-    CLEARBIT(AD2CON1bits.DONE); //MUST HAVE! clear conversion done bit
-    return ADC2BUF0;
-}
 
 int main() {
     /* LCD Initialization Sequence */
@@ -137,7 +130,7 @@ int main() {
     OC7R = 3700;
     OC7RS = 3700;
     OC7CONbits.OCM = 0b110;
-    //    SETBIT(T2CONbits.TON);
+//    SETBIT(T2CONbits.TON);
 
     CLEARBIT(TRISDbits.TRISD7);
     OC8R = 3700;
@@ -152,14 +145,24 @@ int main() {
     uint16_t x_max = -1;
     uint16_t y_min = -1;
     uint16_t y_max = -1;
-    bool xLock = false;
-    bool yLock = false;
 
     lcd_clear();
     lcd_locate(0, 0);
     lcd_printf("Move X, Y to MAX")
     while (1) {
-        joystick_val = sampleJoystick();
+        //        if (press_count < 2) {
+        //            // Read x-axis
+        //            AD2CHS0bits.CH0SA = 4; //set ADC to Sample AN4 pin
+        //        } else {
+        //            // Read y-axis
+        //            AD2CHS0bits.CH0SA = 5; //set ADC to Sample AN5 pin
+        //        }
+
+        // Joystick value sampling code
+        SETBIT(AD2CON1bits.SAMP); //start to sample
+        while (!AD2CON1bits.DONE); //wait for conversion to finish
+        CLEARBIT(AD2CON1bits.DONE); //MUST HAVE! clear conversion done bit
+        joystick_val = ADC2BUF0;
 
 
         /*
@@ -191,24 +194,24 @@ int main() {
         // Show current joystick value
         switchToXAxis(true);
         lcd_locate(0, 1);
-        lcd_printf("joystick val: %d", sampleJoystick());
+        lcd_printf("joystick val: %d", joystick_val);
 
         if (BTN1_PRESSED()) {
-            if (holdBuffer++ > 20) {
+            if (holdBuffer++ > 2) {
                 if (x_max == -1 && y_max == -1) {
                     // set both max values at the same time
                     switchToXAxis(true);
-                    x_max = sampleJoystick();
+                    x_max = joystick_val;
                     switchToXAxis(false);
-                    y_max = sampleJoystick();
+                    y_max = joystick_val;
                     lcd_locate(0, 2);
                     lcd_printf("x: %d, y: %d", x_max, y_max);
                 } else if (x_min == -1 && y_min == -1) {
                     // set both min values at the same time
                     switchToXAxis(true);
-                    x_min = sampleJoystick();
+                    x_min = joystick_val;
                     switchToXAxis(false);
-                    y_min = sampleJoystick();
+                    y_min = joystick_val;
 
                     lcd_locate(0, 3);
                     lcd_printf("x: %d, y: %d", x_min, y_min);
@@ -216,51 +219,45 @@ int main() {
                     uint16_t xservo;
                     uint16_t yservo;
 
-                    int holdMovBuffer = 0;
                     while (1) {
-                        if (BTN1_PRESSED()) {
-                            //                            if (holdMovBuffer++ > 20) {
-                            //                                if (!xLock) {
-                            //                                    xLock = true;
-                            //                                } else if (!yLock) {
-                            //                                    yLock = true;
-                            //                                }
-                            //                            }
-                        } else {
-                            holdMovBuffer = 0;
-                        }
-                        if (!xLock) {
-                            switchToXAxis(true);
-                            joystick_val = sampleJoystick();
+                        switchToXAxis(true);
+                        // Joystick value sampling code
+                        SETBIT(AD2CON1bits.SAMP); //start to sample
+                        while (!AD2CON1bits.DONE); //wait for conversion to finish
+                        CLEARBIT(AD2CON1bits.DONE); //MUST HAVE! clear conversion done bit
+                        joystick_val = ADC2BUF0;
 
 
-                            xservo = floor((joystick_val - x_min) * (double) 240 / (x_max - x_min) + 3580);
+                        xservo = floor((joystick_val - x_min) * (double) 240 / (x_max - x_min) + 3580);
 
-                            OC7R = xservo;
-                            OC7RS = xservo;
-                            OC7CONbits.OCM = 0b110;
-                            //SET BIT(T2CONbits.TON);
-                        }
+                        OC7R = xservo;
+                        OC7RS = xservo;
+                        OC7CONbits.OCM = 0b110;
+                        //SET BIT(T2CONbits.TON);
+
 
                         //lcd_clear();
                         lcd_locate(0, 4);
                         lcd_printf("xservo: %d", xservo);
                         // while(1) ;
 
-                        if (!yLock) {
-                            // SAME CODE AS ABOVE BUT FOR Y AXIS
-                            switchToXAxis(false);
-                            joystick_val = sampleJoystick();
+                        // SAME CODE AS ABOVE BUT FOR Y AXIS
+                        switchToXAxis(false);
+                        // Joystick value sampling code
+                        SETBIT(AD2CON1bits.SAMP); //start to sample
+                        while (!AD2CON1bits.DONE); //wait for conversion to finish
+                        CLEARBIT(AD2CON1bits.DONE); //MUST HAVE! clear conversion done bit
+                        joystick_val = ADC2BUF0;
 
 
-                            yservo = floor((y_max - joystick_val) * (double) 240 / (y_max - y_min) + 3580);
+                        yservo = floor((y_max - joystick_val) * (double) 240 / (y_max - y_min) + 3580);
 
-                            OC8R = yservo;
-                            OC8RS = yservo;
-                            OC8CONbits.OCM = 0b110;
-                            // SETBIT(T2CONbits.TON);
+                        OC8R = yservo;
+                        OC8RS = yservo;
+                        OC8CONbits.OCM = 0b110;
+                        // SETBIT(T2CONbits.TON);
 
-                        }
+
                         //lcd_clear();
                         lcd_locate(0, 5);
                         lcd_printf("yservo: %d", yservo);
@@ -276,7 +273,6 @@ int main() {
         }
         __delay_ms(50);
     };
-
 
 
     lcd_clear();
