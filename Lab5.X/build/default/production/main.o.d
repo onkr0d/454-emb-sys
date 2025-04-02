@@ -1,9 +1,9 @@
-build/default/production/main.o: main.c lcd.h types.h led.h joystick.h
+build/default/production/main.o: main.c joystick.h types.h lcd.h led.h
 
-lcd.h:
+joystick.h:
 
 types.h:
 
-led.h:
+lcd.h:
 
-joystick.h:
+led.h:
