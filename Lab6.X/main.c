@@ -96,6 +96,7 @@ unsigned int sampleABS() {
         samples[numSamples] = val;
         numSamples++;
     }
+    
     // median of samples
     qsort(samples, 5, sizeof (unsigned int), compareInts);
     return samples[2];
@@ -191,8 +192,6 @@ int main() {
     while (true) {
         int corner = cornerCounter % 4;
 
-        // just get the x and y value of the ball location
-        //        switchToXAxis(true);
         lcd_clear();
         lcd_locate(0, 0);
         lcd_printf("C1: X=%04d, Y=%04d", corner0.x, corner0.y);
@@ -207,13 +206,6 @@ int main() {
         lcd_printf("C4: X=%04d, Y=%04d", corner3.x, corner3.y);
         lcd_locate(0, 3);
 
-        //        switchToXAxis(false);
-        //
-        //        lcd_locate(0, 2);
-        //        lcd_printf("y:%06d", sampleABS());
-        //        lcd_locate(0, 5);
-        //        fflush();   
-        __delay_ms(30);
         switch (corner) {
             case 0:
                 switchToXAxis(true);
@@ -301,7 +293,7 @@ int main() {
         }
         cornerCounter++;
 
-        __delay_ms(2500);
+        __delay_ms(2000);
 
         continue;
 
