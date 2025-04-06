@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project>
-  <executable name="dist/default/production/Lab5.X.production.cof">
+  <executable name="dist/default/production/Lab6.X.production.cof">
     <memory name="data">
       <units>bytes</units>
       <length>30720</length>
-      <used>212</used>
-      <free>30508</free>
+      <used>208</used>
+      <free>30512</free>
     </memory>
     <memory name="program">
       <units>bytes</units>
       <length>261888</length>
-      <used>10653</used>
-      <free>251235</free>
+      <used>8616</used>
+      <free>253272</free>
     </memory>
   </executable>
 </project>
