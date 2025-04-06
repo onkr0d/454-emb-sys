@@ -26,6 +26,7 @@
 #include "lcd.h"
 #include "led.h"
 #include "types.h"
+#include "stdlib.h"
 
 /* Initial configuration by EE */
 // Primary (XT, HS, EC) Oscillator with PLL
@@ -37,36 +38,73 @@ _FOSC(OSCIOFNC_OFF &POSCMD_XT);
 // Watchdog Timer Enabled/disabled by user software
 _FWDT(FWDTEN_OFF);
 
-// Disable Code Protection
+// Disable Code Protecd_printf(ction
 _FGS(GCP_OFF);
 
 /**
- * Switches the ADC sampling between X and Y axis of the joystick.
- * Does not sample the joystick - you should switchToXAxis() first, then sampleJoystick().
+ * Switches the ADC sampling between X and Y axis of the Amazing Board System (ABS).
+ * Does not sample the ABS - you should switchToXAxis() first, then sampleJoystick().
  */
 void switchToXAxis(bool xAxis) {
     if (xAxis) {
-        // Read x-axis
+        // Switch to x-axis
+        CLEARBIT(LATEbits.LATE1);
+        SETBIT(LATEbits.LATE2);
+        SETBIT(LATEbits.LATE3);
+
         AD2CHS0bits.CH0SA = 15; // set ADC to Sample AN4 pin
     } else {
-        // Read y-axis
+        // Switch to y-axis
+        SETBIT(LATEbits.LATE1);
+        CLEARBIT(LATEbits.LATE2);
+        CLEARBIT(LATEbits.LATE3);
+
         AD2CHS0bits.CH0SA = 9; // set ADC to Sample AN5 pin
     }
+    // important: delay to clear channels
+    __delay_ms(50);
 }
 
-/**
- * Samples the joystick and returns the value.
+int compareInts(const void *a, const void *b) {
+    unsigned int int_a = *(const unsigned int *) a;
+    unsigned int int_b = *(const unsigned int *) b;
+    if (int_a < int_b) return -1;
+    if (int_a > int_b) return 1;
+    return 0;
+}
+
+/*
+ * Samples the Amazing Ball System (ABS) and returns the value.
  * Should be preceded by a call to switchToXAxis().
  */
-int sampleJoystick() {
-    // Joystick value sampling code
-    SETBIT(AD2CON1bits.SAMP); // start to sample
-    while (!AD2CON1bits.DONE); // wait for conversion to finish
-    // reduce risk of ADC sampling
-    int ret = ADC2BUF0;
-    CLEARBIT(AD2CON1bits.DONE); // MUST HAVE! clear conversion done bit
-    return ret;
+
+
+// Changed size to 4 to match the loop
+
+unsigned int sampleABS() {
+    int numSamples = 0;
+    unsigned int samples[5] = {0, 0, 0, 0, 0};
+
+
+    while (numSamples < 5) {
+        // Joystick value sampling code
+        SETBIT(AD2CON1bits.SAMP); // start to sample
+        while (!AD2CON1bits.DONE); // wait for conversion to finish
+        // reduce risk of ADC sampling
+        unsigned int val = ADC2BUF0;
+        CLEARBIT(AD2CON1bits.DONE); // MUST HAVE! clear conversion done bit
+        samples[numSamples] = val;
+        numSamples++;
+    }
+    // median of samples
+    qsort(samples, 5, sizeof (unsigned int), compareInts);
+    return samples[2];
 }
+
+struct cornerPos {
+    unsigned int x;
+    unsigned int y;
+};
 
 int main() {
     /* LCD Initialization Sequence */
@@ -86,9 +124,9 @@ int main() {
         CLEARBIT(TRISEbits.TRISE2);
         CLEARBIT(TRISEbits.TRISE3);
 
-        SETBIT(LATEbits.LATE1);
-        CLEARBIT(LATEbits.LATE2);
-        CLEARBIT(LATEbits.LATE3);
+        CLEARBIT(LATEbits.LATE1);
+        SETBIT(LATEbits.LATE2);
+        SETBIT(LATEbits.LATE3);
     }
     // disable ADC
     CLEARBIT(AD2CON1bits.ADON);
@@ -120,47 +158,153 @@ int main() {
     // enable ADC
     SETBIT(AD2CON1bits.ADON);
 
-//    CLEARBIT(T2CONbits.TON);
-//    CLEARBIT(T2CONbits.TCS);
-//    CLEARBIT(T2CONbits.TGATE);
-//    TMR2 = 0;
-//    T2CONbits.TCKPS = 0b10;
-//    CLEARBIT(IEC0bits.T2IE);
-//    CLEARBIT(IEC0bits.T2IE);
-//    PR2 = 4000;
+    CLEARBIT(T2CONbits.TON);
+    CLEARBIT(T2CONbits.TCS);
+    CLEARBIT(T2CONbits.TGATE);
+    TMR2 = 0;
+    T2CONbits.TCKPS = 0b10;
+    CLEARBIT(IEC0bits.T2IE);
+    CLEARBIT(IEC0bits.T2IE);
+    PR2 = 4000;
 
-//    CLEARBIT(TRISDbits.TRISD6);
-//    OC7R = 3700;
-//    OC7RS = 3700;
-//    OC7CONbits.OCM = 0b110;
+    //    CLEARBIT(TRISDbits.TRISD6);
+    //    OC7R = 3580;
+    //    OC7RS = 3580;
+    //    OC7CONbits.OCM = 0b110;
+    //       SETBIT(T2CONbits.TON);
+    //
+    //    CLEARBIT(TRISDbits.TRISD7);
+    //    OC8R = 3580;
+    //    OC8RS = 3580;
+    //    OC8CONbits.OCM = 0b110;
     //    SETBIT(T2CONbits.TON);
-
-//    CLEARBIT(TRISDbits.TRISD7);
-//    OC8R = 3700;
-//    OC8RS = 3700;
-//    OC8CONbits.OCM = 0b110;
-//    SETBIT(T2CONbits.TON);
 
     lcd_clear();
 
+
+    int cornerCounter = 0;
+    struct cornerPos corner0 = {.x = 0, .y = 0};
+    struct cornerPos corner1 = {.x = 0, .y = 0};
+    struct cornerPos corner2 = {.x = 0, .y = 0};
+    struct cornerPos corner3 = {.x = 0, .y = 0};
+
     while (true) {
+        int corner = cornerCounter % 4;
+
         // just get the x and y value of the ball location
-        switchToXAxis(true);
+        //        switchToXAxis(true);
+        lcd_clear();
         lcd_locate(0, 0);
-        lcd_printf("x:%06d \n", sampleJoystick());
+        lcd_printf("C1: X=%04d, Y=%04d", corner0.x, corner0.y);
         lcd_locate(0, 0);
-
-
-        __delay_ms(50);
-
-        switchToXAxis(false);
+        lcd_locate(0, 1);
+        lcd_printf("C2: X=%04d, Y=%04d", corner1.x, corner1.y);
+        lcd_locate(0, 1);
         lcd_locate(0, 2);
-        lcd_printf("y:%06d \n", sampleJoystick());
+        lcd_printf("C3: X=%04d, Y=%04d", corner2.x, corner2.y);
         lcd_locate(0, 2);
+        lcd_locate(0, 3);
+        lcd_printf("C4: X=%04d, Y=%04d", corner3.x, corner3.y);
+        lcd_locate(0, 3);
 
-        __delay_ms(50);
+        //        switchToXAxis(false);
+        //
+        //        lcd_locate(0, 2);
+        //        lcd_printf("y:%06d", sampleABS());
+        //        lcd_locate(0, 5);
+        //        fflush();   
+        __delay_ms(30);
+        switch (corner) {
+            case 0:
+                switchToXAxis(true);
+                corner0.x = sampleABS();
+                switchToXAxis(false);
+                corner0.y = sampleABS();
+                break;
+            case 1:
+                switchToXAxis(true);
+                corner1.x = sampleABS();
+                switchToXAxis(false);
+                corner1.y = sampleABS();
+                break;
+            case 2:
+                switchToXAxis(true);
+                corner2.x = sampleABS();
+                switchToXAxis(false);
+                corner2.y = sampleABS();
+                break;
+            case 3:
+                switchToXAxis(true);
+                corner3.x = sampleABS();
+                switchToXAxis(false);
+                corner3.y = sampleABS();
+                break;
+        }
+
+        // move to corner
+        switch (corner) {
+            case 0:
+                CLEARBIT(TRISDbits.TRISD6);
+                OC7R = 3580;
+                OC7RS = 3580;
+                OC7CONbits.OCM = 0b110;
+                SETBIT(T2CONbits.TON);
+
+                CLEARBIT(TRISDbits.TRISD7);
+                OC8R = 3580;
+                OC8RS = 3580;
+                OC8CONbits.OCM = 0b110;
+                SETBIT(T2CONbits.TON);
+                break;
+
+            case 1:
+                CLEARBIT(TRISDbits.TRISD6);
+                OC7R = 3800;
+                OC7RS = 3800;
+                OC7CONbits.OCM = 0b110;
+                SETBIT(T2CONbits.TON);
+
+                CLEARBIT(TRISDbits.TRISD7);
+                OC8R = 3580;
+                OC8RS = 3580;
+                OC8CONbits.OCM = 0b110;
+                SETBIT(T2CONbits.TON);
+                break;
+
+            case 2:
+                CLEARBIT(TRISDbits.TRISD6);
+                OC7R = 3800;
+                OC7RS = 3800;
+                OC7CONbits.OCM = 0b110;
+                SETBIT(T2CONbits.TON);
+
+                CLEARBIT(TRISDbits.TRISD7);
+                OC8R = 3800;
+                OC8RS = 3800;
+                OC8CONbits.OCM = 0b110;
+                SETBIT(T2CONbits.TON);
+                break;
+
+            case 3:
+                CLEARBIT(TRISDbits.TRISD6);
+                OC7R = 3580;
+                OC7RS = 3580;
+                OC7CONbits.OCM = 0b110;
+                SETBIT(T2CONbits.TON);
+
+                CLEARBIT(TRISDbits.TRISD7);
+                OC8R = 3800;
+                OC8RS = 3800;
+                OC8CONbits.OCM = 0b110;
+                SETBIT(T2CONbits.TON);
+                break;
+        }
+        cornerCounter++;
+
+        __delay_ms(2500);
 
         continue;
+
         //        uint16_t xservo = 0;
         //        uint16_t yservo = 0;
         //        int joystick_val = 0;
