@@ -96,7 +96,7 @@ unsigned int sampleABS() {
         samples[numSamples] = val;
         numSamples++;
     }
-    
+
     // median of samples
     qsort(samples, 5, sizeof (unsigned int), compareInts);
     return samples[2];
@@ -136,7 +136,6 @@ int main() {
     SETBIT(TRISBbits.TRISB4); // Reads RB4 (x-axis)
     SETBIT(TRISBbits.TRISB5); // Reads RB5 (y-axis)
 
-
     {
         // set pins to be analog, 3.6.1 from lab manual, page 15
         CLEARBIT(AD2PCFGLbits.PCFG15); // analog for x-axis
@@ -155,7 +154,6 @@ int main() {
     AD2CON3bits.SAMC = 0x1F; // sample-to-conversion clock = 31Tad
     AD2CON3bits.ADCS = 0x2; // Tad = 3Tcy (Time cycles)
 
-    // Leave AD1CON4 at its default value
     // enable ADC
     SETBIT(AD2CON1bits.ADON);
 
@@ -168,20 +166,7 @@ int main() {
     CLEARBIT(IEC0bits.T2IE);
     PR2 = 4000;
 
-    //    CLEARBIT(TRISDbits.TRISD6);
-    //    OC7R = 3580;
-    //    OC7RS = 3580;
-    //    OC7CONbits.OCM = 0b110;
-    //       SETBIT(T2CONbits.TON);
-    //
-    //    CLEARBIT(TRISDbits.TRISD7);
-    //    OC8R = 3580;
-    //    OC8RS = 3580;
-    //    OC8CONbits.OCM = 0b110;
-    //    SETBIT(T2CONbits.TON);
-
     lcd_clear();
-
 
     int cornerCounter = 0;
     struct cornerPos corner0 = {.x = 0, .y = 0};
@@ -292,36 +277,7 @@ int main() {
                 break;
         }
         cornerCounter++;
-
         __delay_ms(2000);
-
-        continue;
-
-        //        uint16_t xservo = 0;
-        //        uint16_t yservo = 0;
-        //        int joystick_val = 0;
-        //
-        //        {
-        //            // x move servo!
-        //            switchToXAxis(true);
-        //            int joystick_val = sampleJoystick();
-        //            xservo = floor((joystick_val - x_min) * (double) 240 / (x_max - x_min) + 3580);
-        //            OC7R = xservo;
-        //            OC7RS = xservo;
-        //            OC7CONbits.OCM = 0b110;
-        //        }
-        //
-        //
-        //        {
-        //            // move y servo!
-        //            switchToXAxis(false);
-        //            joystick_val = sampleJoystick();
-        //            yservo = floor((y_max - joystick_val) * (double) 240 / (y_max - y_min) + 3580);
-        //            OC8R = yservo;
-        //            OC8RS = yservo;
-        //            OC8CONbits.OCM = 0b110;
-        //        }
-
     }
     return 0;
 }
