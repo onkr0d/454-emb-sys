@@ -64,6 +64,7 @@ void switchToXAxis(bool xAxis) {
     // important: delay to clear channels
     //    t2cycle(2);
     __delay_ms(50);
+    //    t2cycle(50);
 
 }
 
@@ -93,6 +94,9 @@ unsigned int sampleABS() {
 
         // Joystick value sampling code
         SETBIT(AD1CON1bits.SAMP); // start to sample
+        // wait for sampling or no?
+        CLEARBIT(AD1CON1bits.SAMP); // start to sample
+
         while (!AD1CON1bits.DONE); // wait for conversion to finish
         // reduce risk of ADC sampling
         unsigned int val = ADC1BUF0;
@@ -115,10 +119,10 @@ struct cornerPos {
 void t2cycle(uint16_t amount) {
     uint16_t tStart;
 
-    /*    while (amount--)*/
-    {
+    while (amount--) {
         tStart = TMR2;
-        while (tStart == TMR2);
+        //        while (tStart == TMR2);
+        SETLED(LED2_PORT);
         while (tStart != TMR2);
     }
 }
@@ -192,22 +196,22 @@ int main() {
     struct cornerPos corner1 = {.x = 0, .y = 0};
     struct cornerPos corner2 = {.x = 0, .y = 0};
     struct cornerPos corner3 = {.x = 0, .y = 0};
-
+    SETLED(LED4_PORT);
     while (true) {
         int corner = cornerCounter % 4;
 
         lcd_clear();
         lcd_locate(0, 0);
-        lcd_printf("C1: X=%04d, Y=%04d", corner0.x, corner0.y);
+        lcd_printf("C1: X=%04d, Y=%04d %s", corner0.x, corner0.y, corner == 0 ? "<-" : "");
         lcd_locate(0, 0);
         lcd_locate(0, 1);
-        lcd_printf("C2: X=%04d, Y=%04d", corner1.x, corner1.y);
+        lcd_printf("C2: X=%04d, Y=%04d %s", corner1.x, corner1.y, corner == 1 ? "<-" : "");
         lcd_locate(0, 1);
         lcd_locate(0, 2);
-        lcd_printf("C3: X=%04d, Y=%04d", corner2.x, corner2.y);
+        lcd_printf("C3: X=%04d, Y=%04d %s", corner2.x, corner2.y, corner == 2 ? "<-" : "");
         lcd_locate(0, 2);
         lcd_locate(0, 3);
-        lcd_printf("C4: X=%04d, Y=%04d", corner3.x, corner3.y);
+        lcd_printf("C4: X=%04d, Y=%04d %s", corner3.x, corner3.y, corner == 3 ? "<-" : "");
         lcd_locate(0, 3);
 
         switch (corner) {
@@ -238,6 +242,9 @@ int main() {
         }
 
         // move to corner
+
+
+
         switch (corner) {
             case 0:
                 CLEARBIT(TRISDbits.TRISD6);
@@ -295,6 +302,8 @@ int main() {
                 SETBIT(T2CONbits.TON);
                 break;
         }
+
+
         cornerCounter++;
 
         // below: buncha crap to 'flush' out the buffer, or whatever
@@ -303,7 +312,8 @@ int main() {
         switchToXAxis(false);
         sampleABS();
         //        t2cycle( 100 );
-        __delay_ms(1800);
+        //        t2cycle( 900 ) ;
+        __delay_ms(2000); // not exactly 2 seconds because switching axis adds a 50ms delay, plus other stuff. double check this number before demo!
         switchToXAxis(true);
         sampleABS();
         switchToXAxis(false);
