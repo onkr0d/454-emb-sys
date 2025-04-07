@@ -52,17 +52,19 @@ void switchToXAxis(bool xAxis) {
         SETBIT(LATEbits.LATE2);
         SETBIT(LATEbits.LATE3);
 
-        AD2CHS0bits.CH0SA = 15; // set ADC to Sample AN4 pin
+        AD1CHS0bits.CH0SA = 15; // set ADC to Sample AN4 pin
     } else {
         // Switch to y-axis
         SETBIT(LATEbits.LATE1);
         CLEARBIT(LATEbits.LATE2);
         CLEARBIT(LATEbits.LATE3);
 
-        AD2CHS0bits.CH0SA = 9; // set ADC to Sample AN5 pin
+        AD1CHS0bits.CH0SA = 9; // set ADC to Sample AN5 pin
     }
     // important: delay to clear channels
+    //    t2cycle(2);
     __delay_ms(50);
+
 }
 
 int compareInts(const void *a, const void *b) {
@@ -82,23 +84,26 @@ int compareInts(const void *a, const void *b) {
 // Changed size to 4 to match the loop
 
 unsigned int sampleABS() {
+    SETLED(LED4_PORT);
+
     int numSamples = 0;
     unsigned int samples[5] = {0, 0, 0, 0, 0};
 
-
     while (numSamples < 5) {
+
         // Joystick value sampling code
-        SETBIT(AD2CON1bits.SAMP); // start to sample
-        while (!AD2CON1bits.DONE); // wait for conversion to finish
+        SETBIT(AD1CON1bits.SAMP); // start to sample
+        while (!AD1CON1bits.DONE); // wait for conversion to finish
         // reduce risk of ADC sampling
-        unsigned int val = ADC2BUF0;
-        CLEARBIT(AD2CON1bits.DONE); // MUST HAVE! clear conversion done bit
+        unsigned int val = ADC1BUF0;
+        CLEARBIT(AD1CON1bits.DONE); // MUST HAVE! clear conversion done bit
         samples[numSamples] = val;
         numSamples++;
     }
 
     // median of samples
     qsort(samples, 5, sizeof (unsigned int), compareInts);
+    CLEARLED(LED4_PORT);
     return samples[2];
 }
 
@@ -106,6 +111,17 @@ struct cornerPos {
     unsigned int x;
     unsigned int y;
 };
+
+void t2cycle(uint16_t amount) {
+    uint16_t tStart;
+
+    /*    while (amount--)*/
+    {
+        tStart = TMR2;
+        while (tStart == TMR2);
+        while (tStart != TMR2);
+    }
+}
 
 int main() {
     /* LCD Initialization Sequence */
@@ -130,32 +146,32 @@ int main() {
         SETBIT(LATEbits.LATE3);
     }
     // disable ADC
-    CLEARBIT(AD2CON1bits.ADON);
+    CLEARBIT(AD1CON1bits.ADON);
 
     // initialize TRIS pins as inputs
-    SETBIT(TRISBbits.TRISB4); // Reads RB4 (x-axis)
-    SETBIT(TRISBbits.TRISB5); // Reads RB5 (y-axis)
+    SETBIT(TRISBbits.TRISB15); // Reads RB4 (x-axis)
+    SETBIT(TRISBbits.TRISB9); // Reads RB5 (y-axis)
 
     {
         // set pins to be analog, 3.6.1 from lab manual, page 15
-        CLEARBIT(AD2PCFGLbits.PCFG15); // analog for x-axis
-        CLEARBIT(AD2PCFGLbits.PCFG9); // analog for y-axis
+        CLEARBIT(AD1PCFGLbits.PCFG15); // analog for x-axis
+        CLEARBIT(AD1PCFGLbits.PCFG9); // analog for y-axis
     }
     // Configure AD1CON2
-    SETBIT(AD2CON1bits.AD12B); // choose 12 bit operation mode
-    AD2CON1bits.FORM = 0; // set integer output
-    AD2CON1bits.SSRC = 0x7; // set automatic conversion
+    SETBIT(AD1CON1bits.AD12B); // choose 12 bit operation mode
+    AD1CON1bits.FORM = 0; // set integer output
+    AD1CON1bits.SSRC = 0x7; // set automatic conversion
 
     // Configure AD1CON2
-    AD2CON2 = 0; // not using scanning sampling
+    AD1CON2 = 0; // not using scanning sampling
 
     // Configure AD1CON3
-    CLEARBIT(AD2CON3bits.ADRC); // internal clock source
-    AD2CON3bits.SAMC = 0x1F; // sample-to-conversion clock = 31Tad
-    AD2CON3bits.ADCS = 0x2; // Tad = 3Tcy (Time cycles)
+    CLEARBIT(AD1CON3bits.ADRC); // internal clock source
+    AD1CON3bits.SAMC = 0x1F; // sample-to-conversion clock = 31Tad
+    AD1CON3bits.ADCS = 0x2; // Tad = 3Tcy (Time cycles)
 
     // enable ADC
-    SETBIT(AD2CON1bits.ADON);
+    SETBIT(AD1CON1bits.ADON);
 
     CLEARBIT(T2CONbits.TON);
     CLEARBIT(T2CONbits.TCS);
@@ -165,6 +181,9 @@ int main() {
     CLEARBIT(IEC0bits.T2IE);
     CLEARBIT(IEC0bits.T2IE);
     PR2 = 4000;
+
+    //lcd for debug
+    CLEARBIT(LED4_TRIS); // Set Pin to Output
 
     lcd_clear();
 
@@ -277,7 +296,18 @@ int main() {
                 break;
         }
         cornerCounter++;
-        __delay_ms(2000);
+
+        // below: buncha crap to 'flush' out the buffer, or whatever
+        switchToXAxis(true);
+        sampleABS();
+        switchToXAxis(false);
+        sampleABS();
+        //        t2cycle( 100 );
+        __delay_ms(1800);
+        switchToXAxis(true);
+        sampleABS();
+        switchToXAxis(false);
+        sampleABS();
     }
     return 0;
 }
