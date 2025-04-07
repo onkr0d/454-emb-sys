@@ -89,6 +89,11 @@ unsigned int sampleABS() {
     while (numSamples < 5) {
         // Joystick value sampling code
         SETBIT(AD2CON1bits.SAMP); // start to sample
+        
+        __delay_us(10); // sample for 10 ms
+
+        CLEARBIT(AD2CON1bits.SAMP); // stop sampling, begin conversion
+        
         while (!AD2CON1bits.DONE); // wait for conversion to finish
         // reduce risk of ADC sampling
         unsigned int val = ADC2BUF0;
@@ -153,6 +158,8 @@ int main() {
     CLEARBIT(AD2CON3bits.ADRC); // internal clock source
     AD2CON3bits.SAMC = 0x1F; // sample-to-conversion clock = 31Tad
     AD2CON3bits.ADCS = 0x2; // Tad = 3Tcy (Time cycles)
+
+    AD2CON3 = 0x0002; //manual sample, from example Example 16-1 in dsPIC33F.16_-_ADC
 
     // enable ADC
     SETBIT(AD2CON1bits.ADON);
