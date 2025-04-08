@@ -41,30 +41,30 @@ _FWDT(FWDTEN_OFF);
 // Disable Code Protecd_printf(ction
 _FGS(GCP_OFF);
 
-/**
+/*
  * Switches the ADC sampling between X and Y axis of the Amazing Board System (ABS).
  * Does not sample the ABS - you should switchToXAxis() first, then sampleJoystick().
  */
 void switchToXAxis(bool xAxis) {
     if (xAxis) {
         // Switch to x-axis
-        CLEARBIT(LATEbits.LATE1);
         SETBIT(LATEbits.LATE2);
         SETBIT(LATEbits.LATE3);
+        CLEARBIT(LATEbits.LATE1);
 
         AD1CHS0bits.CH0SA = 15; // set ADC to Sample AN4 pin
     } else {
         // Switch to y-axis
         SETBIT(LATEbits.LATE1);
-        CLEARBIT(LATEbits.LATE2);
         CLEARBIT(LATEbits.LATE3);
+        CLEARBIT(LATEbits.LATE2);
+
 
         AD1CHS0bits.CH0SA = 9; // set ADC to Sample AN5 pin
     }
     // important: delay to clear channels
-    //    t2cycle(2);
+    //        t2cycle( 2 );
     __delay_ms(50);
-    //    t2cycle(50);
 
 }
 
@@ -80,10 +80,6 @@ int compareInts(const void *a, const void *b) {
  * Samples the Amazing Ball System (ABS) and returns the value.
  * Should be preceded by a call to switchToXAxis().
  */
-
-
-// Changed size to 4 to match the loop
-
 unsigned int sampleABS() {
     SETLED(LED4_PORT);
 
@@ -95,7 +91,10 @@ unsigned int sampleABS() {
         // Joystick value sampling code
         SETBIT(AD1CON1bits.SAMP); // start to sample
         // wait for sampling or no?
-        CLEARBIT(AD1CON1bits.SAMP); // start to sample
+        //        CLEARBIT(AD1CON1bits.SAMP); // start to sample
+
+        __delay_ms(5);
+        CLEARBIT(AD1CON1bits.SAMP);
 
         while (!AD1CON1bits.DONE); // wait for conversion to finish
         // reduce risk of ADC sampling
@@ -116,14 +115,16 @@ struct cornerPos {
     unsigned int y;
 };
 
-void t2cycle(uint16_t amount) {
+void t2cycle(uint16_t amount) { // wait 20 ms
     uint16_t tStart;
 
     while (amount--) {
         tStart = TMR2;
-        //        while (tStart == TMR2);
-        SETLED(LED2_PORT);
+        while (tStart == TMR2);
+
         while (tStart != TMR2);
+
+
     }
 }
 
@@ -138,6 +139,8 @@ int main() {
     CLEARBIT(LED2_TRIS); // Set Pin to Output
     CLEARBIT(LED3_TRIS); // Set Pin to Output
     CLEARBIT(LED4_TRIS); // Set Pin to Output
+    CLEARBIT(LED5_TRIS); // Set Pin to Output
+
 
     // lab manual page 29, for x axis touch screen
     {
@@ -153,14 +156,15 @@ int main() {
     CLEARBIT(AD1CON1bits.ADON);
 
     // initialize TRIS pins as inputs
-    SETBIT(TRISBbits.TRISB15); // Reads RB4 (x-axis)
-    SETBIT(TRISBbits.TRISB9); // Reads RB5 (y-axis)
+    SETBIT(TRISBbits.TRISB15); // Reads RB15 (x-axis)
+    SETBIT(TRISBbits.TRISB9); // Reads RB9 (y-axis)
 
     {
         // set pins to be analog, 3.6.1 from lab manual, page 15
         CLEARBIT(AD1PCFGLbits.PCFG15); // analog for x-axis
         CLEARBIT(AD1PCFGLbits.PCFG9); // analog for y-axis
     }
+    
     // Configure AD1CON2
     SETBIT(AD1CON1bits.AD12B); // choose 12 bit operation mode
     AD1CON1bits.FORM = 0; // set integer output
@@ -182,9 +186,14 @@ int main() {
     CLEARBIT(T2CONbits.TGATE);
     TMR2 = 0;
     T2CONbits.TCKPS = 0b10;
-    CLEARBIT(IEC0bits.T2IE);
-    CLEARBIT(IEC0bits.T2IE);
     PR2 = 4000;
+    CLEARBIT(IFS0bits.T2IF);
+    CLEARBIT(IEC0bits.T2IE);
+
+    SETBIT(T2CONbits.TON);
+
+    AD2CON3 = 0x0002; //manual sample, from example Example 16-1 in dsPIC33F.16_-_ADC
+
 
     //lcd for debug
     CLEARBIT(LED4_TRIS); // Set Pin to Output
@@ -196,9 +205,71 @@ int main() {
     struct cornerPos corner1 = {.x = 0, .y = 0};
     struct cornerPos corner2 = {.x = 0, .y = 0};
     struct cornerPos corner3 = {.x = 0, .y = 0};
+
     SETLED(LED4_PORT);
+
     while (true) {
         int corner = cornerCounter % 4;
+
+        switch (corner) {
+            case 0:
+                CLEARBIT(TRISDbits.TRISD6);
+                OC7R = 3580;
+                OC7RS = 3580;
+                OC7CONbits.OCM = 0b110;
+                //                SETBIT(T2CONbits.TON);
+
+                CLEARBIT(TRISDbits.TRISD7);
+                OC8R = 3580;
+                OC8RS = 3580;
+                OC8CONbits.OCM = 0b110;
+                //                SETBIT(T2CONbits.TON);
+                break;
+
+            case 1:
+                CLEARBIT(TRISDbits.TRISD6);
+                OC7R = 3800;
+                OC7RS = 3800;
+                OC7CONbits.OCM = 0b110;
+                //                SETBIT(T2CONbits.TON);
+
+                CLEARBIT(TRISDbits.TRISD7);
+                OC8R = 3580;
+                OC8RS = 3580;
+                OC8CONbits.OCM = 0b110;
+                //                SETBIT(T2CONbits.TON);
+                break;
+
+            case 2:
+                CLEARBIT(TRISDbits.TRISD6);
+                OC7R = 3800;
+                OC7RS = 3800;
+                OC7CONbits.OCM = 0b110;
+                //                SETBIT(T2CONbits.TON);
+
+                CLEARBIT(TRISDbits.TRISD7);
+                OC8R = 3800;
+                OC8RS = 3800;
+                OC8CONbits.OCM = 0b110;
+                //                SETBIT(T2CONbits.TON);
+                break;
+
+            case 3:
+                CLEARBIT(TRISDbits.TRISD6);
+                OC7R = 3580;
+                OC7RS = 3580;
+                OC7CONbits.OCM = 0b110;
+                //                SETBIT(T2CONbits.TON);
+
+                CLEARBIT(TRISDbits.TRISD7);
+                OC8R = 3800;
+                OC8RS = 3800;
+                OC8CONbits.OCM = 0b110;
+                //                SETBIT(T2CONbits.TON);
+                break;
+        }
+
+        __delay_ms(1850); // not exactly 2 seconds because switching axis adds a 50ms delay, plus other stuff. double check this number before demo!
 
         lcd_clear();
         lcd_locate(0, 0);
@@ -245,79 +316,23 @@ int main() {
 
 
 
-        switch (corner) {
-            case 0:
-                CLEARBIT(TRISDbits.TRISD6);
-                OC7R = 3580;
-                OC7RS = 3580;
-                OC7CONbits.OCM = 0b110;
-                SETBIT(T2CONbits.TON);
 
-                CLEARBIT(TRISDbits.TRISD7);
-                OC8R = 3580;
-                OC8RS = 3580;
-                OC8CONbits.OCM = 0b110;
-                SETBIT(T2CONbits.TON);
-                break;
-
-            case 1:
-                CLEARBIT(TRISDbits.TRISD6);
-                OC7R = 3800;
-                OC7RS = 3800;
-                OC7CONbits.OCM = 0b110;
-                SETBIT(T2CONbits.TON);
-
-                CLEARBIT(TRISDbits.TRISD7);
-                OC8R = 3580;
-                OC8RS = 3580;
-                OC8CONbits.OCM = 0b110;
-                SETBIT(T2CONbits.TON);
-                break;
-
-            case 2:
-                CLEARBIT(TRISDbits.TRISD6);
-                OC7R = 3800;
-                OC7RS = 3800;
-                OC7CONbits.OCM = 0b110;
-                SETBIT(T2CONbits.TON);
-
-                CLEARBIT(TRISDbits.TRISD7);
-                OC8R = 3800;
-                OC8RS = 3800;
-                OC8CONbits.OCM = 0b110;
-                SETBIT(T2CONbits.TON);
-                break;
-
-            case 3:
-                CLEARBIT(TRISDbits.TRISD6);
-                OC7R = 3580;
-                OC7RS = 3580;
-                OC7CONbits.OCM = 0b110;
-                SETBIT(T2CONbits.TON);
-
-                CLEARBIT(TRISDbits.TRISD7);
-                OC8R = 3800;
-                OC8RS = 3800;
-                OC8CONbits.OCM = 0b110;
-                SETBIT(T2CONbits.TON);
-                break;
-        }
 
 
         cornerCounter++;
 
         // below: buncha crap to 'flush' out the buffer, or whatever
-        switchToXAxis(true);
-        sampleABS();
-        switchToXAxis(false);
-        sampleABS();
-        //        t2cycle( 100 );
-        //        t2cycle( 900 ) ;
-        __delay_ms(2000); // not exactly 2 seconds because switching axis adds a 50ms delay, plus other stuff. double check this number before demo!
-        switchToXAxis(true);
-        sampleABS();
-        switchToXAxis(false);
-        sampleABS();
+        //        switchToXAxis(true);
+        //        sampleABS();
+        //        switchToXAxis(false);
+        //        sampleABS();
+
+        //        t2cycle( 5 * 50 );
+
+        //        switchToXAxis(true);
+        //        sampleABS();
+        //        switchToXAxis(false);
+        //        sampleABS();
     }
     return 0;
 }
