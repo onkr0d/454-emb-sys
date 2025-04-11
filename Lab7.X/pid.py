@@ -18,8 +18,13 @@ class World:
     sphere: int
 
 
-old_x = 0.0
-old_y = 0.0
+
+state = {
+	"old_x": 0.0,
+	"old_y": 0.0,
+	"old_t": 0.0
+}
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -44,15 +49,22 @@ def run_controller(kp, kd, setpoint, noise, filtered, world: World):
 
     # you can set the variables that should stay accross control loop here
 
+
+
     def pd_controller(x, y, kp, kd, setpoint):
         """Implement a PD controller, you can access the setpoint via setpoint.x and setpoint.y
         the plate is small around 0.1 to 0.2 meters. You will have to calculate the error and change in error and 
         use those to calculate the angle to apply to the plate."""
+        
+        # Error calculation
+        err_x = setpoint.x - x
+        err_y = setpoint.y - y
 
-        out_x = - ( kp * x + kd * ( x - old_x ) )
+        out_x = - ( kp * x + kd * ( x - state["old_x"] ) )
+        out_y = - ( kp * y + kd * ( y - state["old_y"] ) )
         
-        out_y = - ( kp * y + kd * ( y - old_y ) )
-        
+        state["old_x"] = x
+        state["old_y"] = y
 
         return out_x , out_y
 
@@ -85,8 +97,8 @@ def run_controller(kp, kd, setpoint, noise, filtered, world: World):
 
     utils.loop_every(0.01, every_10ms) # we run our controller at 100 Hz using a linux alarm signal
 
-def run_simulation( initial_ball_position = Point(np.random.uniform(-0.2, 0.2),
-                                                  np.random.uniform(-0.2, 0.2))):
+def run_simulation( initial_ball_position = Point(np.random.uniform(-0.02, -0.019),
+                                                  np.random.uniform(-0.02, -0.019))):
     p.connect(p.GUI)
     p.setAdditionalSearchPath("assets")
     plate = p.loadURDF("plate.urdf")
@@ -107,6 +119,7 @@ def run_simulation( initial_ball_position = Point(np.random.uniform(-0.2, 0.2),
     p.setTimeStep(0.01)
     p.setRealTimeSimulation(1)
     return World(plate=plate, sphere=sphere)
+
 
 
 if __name__ == "__main__":
