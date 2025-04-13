@@ -18,6 +18,10 @@ class World:
     sphere: int
 
 
+state = {
+    "old_x": 0.0,
+    "old_y": 0.0,
+}
 old_x = 0.0
 old_y = 0.0
 
@@ -49,10 +53,14 @@ def run_controller(kp, kd, setpoint, noise, filtered, world: World):
         the plate is small around 0.1 to 0.2 meters. You will have to calculate the error and change in error and 
         use those to calculate the angle to apply to the plate."""
 
-        out_x = - ( kp * x + kd * ( x - old_x ) )
+        err_x = setpoint.x - x
+        err_y = setpoint.y - y
+
+        out_x = - ( kp * x + kd * ( x - state["old_x"] ) )
+        out_y = - ( kp * y + kd * ( y - state["old_y"] ) )
         
-        out_y = - ( kp * y + kd * ( y - old_y ) )
-        
+        state["old_x"] = x
+        state["old_y"] = y
 
         return out_x , out_y
 
@@ -85,8 +93,8 @@ def run_controller(kp, kd, setpoint, noise, filtered, world: World):
 
     utils.loop_every(0.01, every_10ms) # we run our controller at 100 Hz using a linux alarm signal
 
-def run_simulation( initial_ball_position = Point(np.random.uniform(-0.2, 0.2),
-                                                  np.random.uniform(-0.2, 0.2))):
+def run_simulation( initial_ball_position = Point(np.random.uniform(0, 0.01),
+                                                  np.random.uniform(0, 0.01))):
     p.connect(p.GUI)
     p.setAdditionalSearchPath("assets")
     plate = p.loadURDF("plate.urdf")
