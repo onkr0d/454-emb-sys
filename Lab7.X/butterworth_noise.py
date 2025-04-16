@@ -109,7 +109,7 @@ t = np.linspace(time_start, time_end, num=int(N), endpoint=False)
 
 # Generate sampled signal: a sinusoid with main component at 5 Hz
 s_hz = 5
-s = 0 * 1.5 + 0.8*np.sin(2 * np.pi * s_hz * t)
+s = 1.5 + 0.8*np.sin(2 * np.pi * s_hz * t)
 
 # Now generate very messy noise with 100 components in the band 20 Hz to 123 Hz
 n = 0 
@@ -138,22 +138,7 @@ wn = f_cutoff * 2/fc
 # Get the signal coefficients
 b, a = signal.butter(N_ord, wn, 'low', analog=False)
 
-print(b)
-
-
-
 s_filt = signal.lfilter(b, a, s+n)
-
-print( (s+n)[-6:] )
-
-print(a)
-
-print( sum( ( s+n)[-6:] * b ) )
-print( sum( s_filt[-6:] * a[::-1] ) )
-
-
-
-
 
 plotSignal(t, s_filt, "Filtered signal.")
 
@@ -163,7 +148,3 @@ plotFFT(xf, yf, [0, s_hz], [noise_lo_hz, noise_hi_hz])
 
 # Now let's compare the original signal and the filtered time signal
 plotMultipleSignals(t, s+n, 'blue', s_filt, 'red', "Comparison btw original and filtered signal.")
-
-#   print(f"t: {t:.2f}, x: {x:.3f},\ty: {y:.3f},\tax: {angle_x:.3f},\tay: {angle_y:.3f}")
-
-

@@ -18,11 +18,11 @@ class World:
     sphere: int
 
 
+
 state = {
-    "old_x": 0.0,
-    "old_y": 0.0,
-    "old_ex": 0.0,
-    "old_ey": 0.0,
+	"old_x": 0.0,
+	"old_y": 0.0,
+	"old_t": 0.0
 }
 
 
@@ -44,8 +44,8 @@ def parse_args():
 def run_controller(kp, kd, setpoint, noise, filtered, world: World):
 
     def set_plate_angles(theta_x, theta_y):
-        p.setJointMotorControl2(world.plate, 1, p.POSITION_CONTROL, targetPosition=np.clip(theta_x, -0.1, 0.1), force=5, maxVelocity=2)
-        p.setJointMotorControl2(world.plate, 0, p.POSITION_CONTROL, targetPosition=np.clip(-theta_y, -0.1, 0.1), force=5, maxVelocity=2)
+        p.setJointMotorControl2(world.plate, 1, p.POSITION_CONTROL, targetPosition=np.clip( theta_x , -1.0 , 1.0 ) , force=5, maxVelocity=20 )
+        p.setJointMotorControl2(world.plate, 0, p.POSITION_CONTROL, targetPosition=np.clip( theta_y , -1.0 , 1.0 ) , force=5, maxVelocity=20 )
 
     # you can set the variables that should stay accross control loop here
 
@@ -55,23 +55,16 @@ def run_controller(kp, kd, setpoint, noise, filtered, world: World):
         """Implement a PD controller, you can access the setpoint via setpoint.x and setpoint.y
         the plate is small around 0.1 to 0.2 meters. You will have to calculate the error and change in error and 
         use those to calculate the angle to apply to the plate."""
-
-        dt = 0.01 # Everything runs every 10ms, so thats 100hz
         
-        ex = x - setpoint.x
-        ey = y - setpoint.y
-        dex = (ex - state["old_ex"]) / dt # derivative of change in pos, which is just velocity
-        dyx = (ey - state["old_ey"]) / dt
+        # Error calculation
+        err_x = setpoint.x - x
+        err_y = setpoint.y - y
 
-        vx, vy, _ = p.getBaseVelocity(world.sphere)[0]
-
-        out_x = -kp * ex - kd * dex # equation striaght ripped from slides.
-        out_y = -kp * ey - kd * dyx
-
+        out_x = - ( kp * x + kd * ( x - state["old_x"] ) )
+        out_y = - ( kp * y + kd * ( y - state["old_y"] ) )
+        
         state["old_x"] = x
         state["old_y"] = y
-        state["old_ex"] = ex
-        state["old_ey"] = ey
 
         return out_x , out_y
 
@@ -92,9 +85,19 @@ def run_controller(kp, kd, setpoint, noise, filtered, world: World):
             x += utils.noise(t) # the noise added has a frequency between 30 and 50 Hz
             y += utils.noise(t, seed = 43) # so that the noise on y is different than the one on x
         
+
+        
+        
+        
         if filtered:
             x = filter_val(x)
             y = filter_val(y)
+
+
+        y = 0
+        z = 0 
+
+
 
         (angle_x, angle_y) = pd_controller(x, y, kp, kd, setpoint)
         set_plate_angles(angle_x, angle_y)
@@ -104,8 +107,8 @@ def run_controller(kp, kd, setpoint, noise, filtered, world: World):
 
     utils.loop_every(0.01, every_10ms) # we run our controller at 100 Hz using a linux alarm signal
 
-def run_simulation( initial_ball_position = Point(np.random.uniform(-0.02, -0.019),
-                                                  np.random.uniform(-0.02, -0.019))):
+def run_simulation( initial_ball_position = Point(np.random.uniform( -0.0002 , 0.0002 ),
+                                                  np.random.uniform( -0.0002 , 0.0002 ))):
     p.connect(p.GUI)
     p.setAdditionalSearchPath("assets")
     plate = p.loadURDF("plate.urdf")

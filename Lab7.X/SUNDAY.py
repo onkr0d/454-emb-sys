@@ -18,11 +18,11 @@ class World:
     sphere: int
 
 
+
 state = {
-    "old_x": 0.0,
-    "old_y": 0.0,
-    "old_ex": 0.0,
-    "old_ey": 0.0,
+	"old_x": 0.0,
+	"old_y": 0.0,
+	"old_t": 0.0
 }
 
 
@@ -55,23 +55,16 @@ def run_controller(kp, kd, setpoint, noise, filtered, world: World):
         """Implement a PD controller, you can access the setpoint via setpoint.x and setpoint.y
         the plate is small around 0.1 to 0.2 meters. You will have to calculate the error and change in error and 
         use those to calculate the angle to apply to the plate."""
-
-        dt = 0.01 # Everything runs every 10ms, so thats 100hz
         
-        ex = x - setpoint.x
-        ey = y - setpoint.y
-        dex = (ex - state["old_ex"]) / dt # derivative of change in pos, which is just velocity
-        dyx = (ey - state["old_ey"]) / dt
+        # Error calculation
+        err_x = setpoint.x - x
+        err_y = setpoint.y - y
 
-        vx, vy, _ = p.getBaseVelocity(world.sphere)[0]
-
-        out_x = -kp * ex - kd * dex # equation striaght ripped from slides.
-        out_y = -kp * ey - kd * dyx
-
+        out_x = - ( kp * x + kd * ( x - state["old_x"] ) )
+        out_y = - ( kp * y + kd * ( y - state["old_y"] ) )
+        
         state["old_x"] = x
         state["old_y"] = y
-        state["old_ex"] = ex
-        state["old_ey"] = ey
 
         return out_x , out_y
 

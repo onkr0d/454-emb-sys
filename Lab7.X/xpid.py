@@ -18,11 +18,11 @@ class World:
     sphere: int
 
 
+
 state = {
-    "old_x": 0.0,
-    "old_y": 0.0,
-    "old_ex": 0.0,
-    "old_ey": 0.0,
+	"old_x": 0.0,
+	"old_y": 0.0,
+	"old_t": 0.0
 }
 
 
@@ -49,29 +49,32 @@ def run_controller(kp, kd, setpoint, noise, filtered, world: World):
 
     # you can set the variables that should stay accross control loop here
 
-
+ 
 
     def pd_controller(x, y, kp, kd, setpoint):
         """Implement a PD controller, you can access the setpoint via setpoint.x and setpoint.y
         the plate is small around 0.1 to 0.2 meters. You will have to calculate the error and change in error and 
         use those to calculate the angle to apply to the plate."""
-
-        dt = 0.01 # Everything runs every 10ms, so thats 100hz
         
-        ex = x - setpoint.x
-        ey = y - setpoint.y
-        dex = (ex - state["old_ex"]) / dt # derivative of change in pos, which is just velocity
-        dyx = (ey - state["old_ey"]) / dt
+        # Error calculation
+        err_x = setpoint.x - x
+        err_y = setpoint.y - y
 
-        vx, vy, _ = p.getBaseVelocity(world.sphere)[0]
+#        out_x = - ( kp * x + kd * ( x - state["old_x"] ) )
+#        out_y = - ( kp * y + kd * ( y - state["old_y"] ) )
+#        
+#        state["old_x"] = x
+#        state["old_y"] = y
 
-        out_x = -kp * ex - kd * dex # equation striaght ripped from slides.
-        out_y = -kp * ey - kd * dyx
 
-        state["old_x"] = x
-        state["old_y"] = y
-        state["old_ex"] = ex
-        state["old_ey"] = ey
+        out_x = - ( kp * x + kd * ( x - hack_x ) )
+        out_y = - ( kp * y + kd * ( y - hack_y ) )
+        
+        hack_x = x
+        hack_y = y
+
+
+
 
         return out_x , out_y
 
@@ -101,6 +104,10 @@ def run_controller(kp, kd, setpoint, noise, filtered, world: World):
 
         if i%10 == 0: # print every 100 ms
             print(f"t: {t:.2f}, x: {x:.3f},\ty: {y:.3f},\tax: {angle_x:.3f},\tay: {angle_y:.3f}")
+
+
+    hack_x = 0.0
+    hack_y = 0.0
 
     utils.loop_every(0.01, every_10ms) # we run our controller at 100 Hz using a linux alarm signal
 
