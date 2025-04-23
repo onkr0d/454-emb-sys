@@ -94,7 +94,7 @@ def run_controller(kp, kd, setpoint, noise, filtered, world: World):
 # Butterworth Filter Design ###
 
 # Set the filter order
-        N_ord = 4
+        N_ord = 10
 
 # Set the filter cutoff in Hz
         f_cutoff = 13
@@ -119,6 +119,8 @@ def run_controller(kp, kd, setpoint, noise, filtered, world: World):
         3. Apply the forces to the plate
         '''
         (x,y,z), orientation = p.getBasePositionAndOrientation(world.sphere)
+        x_real = y
+        
         if noise:
             x += utils.noise(t) # the noise added has a frequency between 30 and 50 Hz
             y += utils.noise(t, seed = 43) # so that the noise on y is different than the one on x
@@ -126,9 +128,9 @@ def run_controller(kp, kd, setpoint, noise, filtered, world: World):
         
         if filtered:
             state["x_raw"] = np.concatenate( ( state["x_raw"] , [ x ]  ) )
-            state["y_raw"] = np.concatenate( ( state["y_raw"] , [ x ]  ) )
-            x_filt = filter_val( state["x_raw"] )
+            state["y_raw"] = np.concatenate( ( state["y_raw"] , [ y ]  ) )
             y_filt = filter_val( state["y_raw"] )
+            x_filt = filter_val( state["x_raw"] )
             x = x_filt[ -1 ]
             y = y_filt[ -1 ]
 
@@ -137,7 +139,7 @@ def run_controller(kp, kd, setpoint, noise, filtered, world: World):
         set_plate_angles(angle_x, angle_y)
 
         if i%10 == 0: # print every 100 ms
-            print(f"t: {t:.2f}, x: {x:.3f},\ty: {y:.3f},\tax: {angle_x:.3f},\tay: {angle_y:.3f}")
+            print(f"t: {t:.2f}, x: {y:.3f},\ty: { x :.3f},\tax: {angle_x:.3f},\tay: {angle_y:.3f}")
 
     utils.loop_every(0.01, every_10ms) # we run our controller at 100 Hz using a linux alarm signal
 
