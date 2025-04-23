@@ -139,7 +139,7 @@ def run_controller(kp, kd, setpoint, noise, filtered, world: World):
         set_plate_angles(angle_x, angle_y)
 
         if i%10 == 0: # print every 100 ms
-            print(f"t: {t:.2f}, x: {y:.3f},\ty: { x :.3f},\tax: {angle_x:.3f},\tay: {angle_y:.3f}")
+            print(f"t: {t:.2f}, x: {x:.3f},\ty: { y :.3f},\tax: {angle_x:.3f},\tay: {angle_y:.3f}")
 
     utils.loop_every(0.01, every_10ms) # we run our controller at 100 Hz using a linux alarm signal
 
