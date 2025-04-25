@@ -80,13 +80,13 @@ int compareInts(const void *a, const void *b) {
  * Samples the Amazing Ball System (ABS) and returns the value.
  * Should be preceded by a call to switchToXAxis().
  */
-unsigned int sampleABS() {
+signed int sampleABS() {
     SETLED(LED4_PORT);
 
     int numSamples = 0;
-    unsigned int samples[5] = {0, 0, 0, 0, 0};
+    signed int samples[4] = {0, 0, 0, 0};
 
-    while (numSamples < 5) {
+    while (numSamples < 1) {
 
         // Joystick value sampling code
         SETBIT(AD1CON1bits.SAMP); // start to sample
@@ -105,9 +105,9 @@ unsigned int sampleABS() {
     }
 
     // median of samples
-    qsort(samples, 5, sizeof (unsigned int), compareInts);
+//    qsort(samples, 3, sizeof (unsigned int), compareInts);
     CLEARLED(LED4_PORT);
-    return samples[2];
+    return samples[0];
 }
 
 struct pos {
@@ -213,8 +213,8 @@ int main() {
     lcd_clear();
 
     int cornerCounter = 0;
-//    struct pos setPoint = {.x = 1594, .y = 1433};
-    struct pos setPoint = {.x = 1594, .y = 1500};
+    struct pos setPoint = {.x = 1594, .y = 1433};
+//    struct pos setPoint = {.x = 1594, .y = 1600};
     struct pos currPos = {.x = 0, .y = 0};
     struct state prevState = {.x = 0, .y = 0, .ex = 0, .ey = 0};   
     
@@ -228,15 +228,23 @@ int main() {
 
             signed int limy = 0, out_x = 0 , out_y = 0 /* , ex = 0 , ey = 0  */ ;
     
+            unsigned bwoff = 0 ;
+            double x_r[4], x_f[4], y_r[4] , y_f[4] ; 
+            double a[3] = { -0.439220727946 , 1.674598618846 , -2.188288161659 } ;
+            double       b[4] = { 0.005886216155, 0.017658648465 , \ 
+                            0.017658648465, 0.005886216155  } ;
 
+            
+        
             
     while (true) {
 
-
+        bwoff %= 4 ;
 
         
         SETLED(LED1_PORT);
-        t2cycle(2);
+//        t2cycle(2);
+                __delay_ms(40);
         CLEARLED(LED1_PORT);
         //        t2cycle(50); 
 
@@ -250,9 +258,17 @@ int main() {
         switchToXAxis(false);
         currPos.y = sampleABS();
         
+        x_r[bwoff] = currPos.x ;
+        y_r[bwoff] = currPos.y ;
 
- 
-
+        y_f[bwoff] = b[(bwoff)%4]   *y_r[0]    +b[(bwoff+1)%4]*y_r[1] + \ 
+                       b[(bwoff+2)%4]*y_r[2]+b[(bwoff+3)%4]   *y_r[3] - \ 
+                                               a[(bwoff+1)%4] *y_f[1] - \ 
+                   a[(bwoff+2)%4]*y_f[2]-a[(bwoff+3)%4]   *y_f[3] ;
+        
+//        currPos.y = y_f[bwoff] ;
+        
+        
         // Display
         lcd_clear();
         lcd_locate(0, 0);
@@ -263,20 +279,20 @@ int main() {
         
 //        __delay_ms(1850); // not exactly 2 seconds because switching axis adds a 50ms delay, plus other stuff. double check this number before demo!
 
-        double kp = 0.02;
-        double kd = 0;
+        double kp = 0.04;
+        double kd = 0.003;
 
        
         
         // Calculate et and velocity
-        unsigned int dt = 0.2; // Unsure abt this value
+        double dt = 0.2; // Unsure abt this value
         double ex = (currPos.x - setPoint.x) ; // e(t)
         double ey = (currPos.y - setPoint.y) ;
         double dex = (double) (ex - prevState.ex) / dt; // Velocity
         double dey = (double) (ey - prevState.ey) / dt;
 
-        out_x = -kp * ex  - kd * dex  ;
-        out_y = -kp * ey   - kd * dey  ;
+        out_x = -kp * ex   - kd * dex   ;
+        out_y = -kp * ey    - kd * dey   ;
 
         // Save old state
         prevState.x = currPos.x;
