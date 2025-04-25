@@ -65,8 +65,9 @@ void switchToXAxis(bool xAxis) {
     // important: delay to clear channels
     //        t2cycle( 2 );
     __delay_ms(50);
-
 }
+
+// Quicksort helper
 
 int compareInts(const void *a, const void *b) {
     unsigned int int_a = *(const unsigned int *) a;
@@ -111,20 +112,15 @@ unsigned int sampleABS() {
 }
 
 struct pos {
-    signed int x;
-    signed int y;
+    unsigned int x;
+    unsigned int y;
 };
 
 struct state {
-    double x;
-    double  y;
-    double  ex;
-    double  ey;
-};
-
-struct cornerPos {
-    signed int x;
-    signed int y;
+    unsigned int x;
+    unsigned int y;
+    unsigned int ex;
+    unsigned int ey;
 };
 
 void t2cycle(uint16_t amount) { // wait 20 ms
@@ -135,8 +131,6 @@ void t2cycle(uint16_t amount) { // wait 20 ms
         while (tStart == TMR2);
 
         while (tStart != TMR2);
-
-
     }
 }
 
@@ -176,7 +170,7 @@ int main() {
         CLEARBIT(AD1PCFGLbits.PCFG15); // analog for x-axis
         CLEARBIT(AD1PCFGLbits.PCFG9); // analog for y-axis
     }
-    
+
     // Configure AD1CON2
     SETBIT(AD1CON1bits.AD12B); // choose 12 bit operation mode
     AD1CON1bits.FORM = 0; // set integer output
@@ -213,70 +207,48 @@ int main() {
     lcd_clear();
 
     int cornerCounter = 0;
-//    struct pos setPoint = {.x = 1594, .y = 1433};
-    struct pos setPoint = {.x = 1594, .y = 1500};
+    struct pos setPoint = {.x = 1594, .y = 1433};
     struct pos currPos = {.x = 0, .y = 0};
-    struct state prevState = {.x = 0, .y = 0, .ex = 0, .ey = 0};   
-    
-    
-    struct cornerPos corner0 = {.x = 0, .y = 0};
-    struct cornerPos corner1 = {.x = 0, .y = 0};
-    struct cornerPos corner2 = {.x = 0, .y = 0};
-    struct cornerPos corner3 = {.x = 0, .y = 0};
+    struct state prevState = {.x = 0, .y = 0, .ex = 0, .ey = 0};
 
     SETLED(LED4_PORT);
 
-            signed int limy = 0, out_x = 0 , out_y = 0 /* , ex = 0 , ey = 0  */ ;
-    
-
-            
     while (true) {
 
-
-
-        
         SETLED(LED1_PORT);
-        t2cycle(2);
+        t2cycle(50);
         CLEARLED(LED1_PORT);
         //        t2cycle(50); 
 
         //        __delay_ms(700);
         CLEARLED(LED2_PORT);
-//        __delay_ms(500);
+        __delay_ms(500);
 
         // Sampling
         switchToXAxis(true);
         currPos.x = sampleABS();
         switchToXAxis(false);
         currPos.y = sampleABS();
-        
-
- 
 
         // Display
         lcd_clear();
         lcd_locate(0, 0);
-//        lcd_printf("X=%04d, Y=%04d", limy, currPos.y);
-                lcd_printf("X=%04d, Y=%04d", out_x , out_y );
+        lcd_printf("X=%04d, Y=%04d", currPos.x, currPos.y);
         lcd_locate(0, 0);
 
-        
-//        __delay_ms(1850); // not exactly 2 seconds because switching axis adds a 50ms delay, plus other stuff. double check this number before demo!
 
-        double kp = 0.02;
+        double kp = 0;
         double kd = 0;
 
-       
-        
         // Calculate et and velocity
         unsigned int dt = 0.2; // Unsure abt this value
-        double ex = (currPos.x - setPoint.x) ; // e(t)
-        double ey = (currPos.y - setPoint.y) ;
+        unsigned int ex = currPos.x - setPoint.x; // e(t)
+        unsigned int ey = currPos.y - setPoint.y;
         double dex = (double) (ex - prevState.ex) / dt; // Velocity
         double dey = (double) (ey - prevState.ey) / dt;
 
-        out_x = -kp * ex  - kd * dex  ;
-        out_y = -kp * ey   - kd * dey  ;
+        double out_x = -kp * ((double) ex) - kd * dex;
+        double out_y = -kp * ((double) ey) - kd * dey;
 
         // Save old state
         prevState.x = currPos.x;
@@ -284,49 +256,41 @@ int main() {
         prevState.ex = ex;
         prevState.ey = ey;
 
+
+        /* Section below here contains sample code from lab 6 */
+        //        switch ( corner ) {
+        //            case 0:
+
+//        SETLED(LED2_PORT);
+        CLEARBIT(TRISDbits.TRISD6);
+        OC7R = 3820;
+        OC7RS = 3580 + out_y;
+        OC7CONbits.OCM = 0b110;
+        SETBIT(T2CONbits.TON);
+
+//        CLEARBIT(TRISDbits.TRISD7);
+//        OC8R = 3580;
+//        OC8RS = 3820 + out_x;
+//        OC8CONbits.OCM = 0b110;
         
         
         
-
-
-
-        
-        
-                int corner = cornerCounter % 4;
-
-    
-         CLEARBIT(TRISDbits.TRISD6);
-//         OC7R = 1;
-          limy =  3700  -  out_y ; 
-          limy = limy < 3820 ? limy : 3820  ;
-          OC7RS = limy > 3580 ? limy : 3580 ;
-   
-          OC7CONbits.OCM = 0b110;
-                 
-                 
-                 
-                //                SETBIT(T2CONbits.TON);
-
-//                CLEARBIT(TRISDbits.TRISD7);
-//                OC8R = 1;
-//                OC8RS = 3700;
-//                OC8CONbits.OCM = 0b110;
-                //                SETBIT(T2CONbits.TON);
- 
-        
-
+        //                SETBIT(T2CONbits.TON);
+        //                break;
+        //        }
         // below: buncha crap to 'flush' out the buffer, or whatever
         //        switchToXAxis(true);
         //        sampleABS();
         //        switchToXAxis(false);
         //        sampleABS();
 
-        //        t2cycle( 5 * 50 );
+        //                t2cycle( 5 * 50 );
 
         //        switchToXAxis(true);
         //        sampleABS();
         //        switchToXAxis(false);
         //        sampleABS();
+
     }
     return 0;
 }

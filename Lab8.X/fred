@@ -1,0 +1,90 @@
+68d67
+< }
+70c69
+< // Quicksort helper
+---
+> }
+125a125,129
+> struct cornerPos {
+>     unsigned int x;
+>     unsigned int y;
+> };
+> 
+133a138,139
+> 
+> 
+173c179
+< 
+---
+>     
+212c218,224
+<     struct state prevState = {.x = 0, .y = 0, .ex = 0, .ey = 0};
+---
+>     struct state prevState = {.x = 0, .y = 0, .ex = 0, .ey = 0};   
+>     
+>     
+>     struct cornerPos corner0 = {.x = 0, .y = 0};
+>     struct cornerPos corner1 = {.x = 0, .y = 0};
+>     struct cornerPos corner2 = {.x = 0, .y = 0};
+>     struct cornerPos corner3 = {.x = 0, .y = 0};
+217a230,232
+> 
+> 
+>         
+231a247,249
+>         
+> 
+> 
+238a257,258
+>         
+>         __delay_ms(1850); // not exactly 2 seconds because switching axis adds a 50ms delay, plus other stuff. double check this number before demo!
+258a279,302
+>         
+>         
+>         
+> 
+> 
+> 
+>         
+>         
+>                 int corner = cornerCounter % 4;
+> 
+>     
+>          CLEARBIT(TRISDbits.TRISD6);
+>          OC7R = 1;
+>          OC7RS = 3820;
+>          OC7CONbits.OCM = 0b110;
+>                 //                SETBIT(T2CONbits.TON);
+> 
+> //                CLEARBIT(TRISDbits.TRISD7);
+> //                OC8R = 1;
+> //                OC8RS = 3700;
+> //                OC8CONbits.OCM = 0b110;
+>                 //                SETBIT(T2CONbits.TON);
+>  
+>         
+260,277d303
+<         /* Section below here contains sample code from lab 6 */
+<         //        switch ( corner ) {
+<         //            case 0:
+< 
+<         SETLED(LED2_PORT);
+<         CLEARBIT(TRISDbits.TRISD6);
+<         OC7R = 3820;
+<         OC7RS = 3580 + out_y;
+<         OC7CONbits.OCM = 0b110;
+<         SETBIT(T2CONbits.TON);
+< 
+<         CLEARBIT(TRISDbits.TRISD7);
+<         OC8R = 3580;
+<         OC8RS = 3820 + out_x;
+<         OC8CONbits.OCM = 0b110;
+<         //                SETBIT(T2CONbits.TON);
+<         //                break;
+<         //        }
+284c310
+<         //                t2cycle( 5 * 50 );
+---
+>         //        t2cycle( 5 * 50 );
+290d315
+< 
