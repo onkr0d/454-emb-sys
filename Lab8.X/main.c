@@ -120,6 +120,8 @@ struct state {
     double  y;
     double  ex;
     double  ey;
+    double i_ex;
+    double i_ey;
 };
 
 struct cornerPos {
@@ -140,6 +142,7 @@ void t2cycle(uint16_t amount) { // wait 20 ms
     }
 }
 
+double x_rw[4], y_rw[4], x_fl[4] , y_fl[4] = { 0.0 , 0.0 , 0.0 , 0.0 } ;
 
 int main() {
     /* LCD Initialization Sequence */
@@ -237,7 +240,15 @@ int main() {
     struct pos setPoint = {.y = 1594, .x = 1433};
     //    struct pos setPoint = {.x = 1594, .y = 1600};
     struct pos currPos = {.x = 0, .y = 0};
-    struct state prevState = {.x = 0, .y = 0, .ex = 0, .ey = 0};   
+    struct state prevState = 
+    {
+        .x = 0, 
+        .y = 0, 
+        .ex = 0, 
+        .ey = 0,
+        .i_ex = 0,
+        .i_ey = 0
+    };   
     
     
     struct cornerPos corner0 = {.x = 0, .y = 0};
@@ -250,11 +261,11 @@ int main() {
             signed int limy = 0, out_x = 0 , out_y = 0 /* , ex = 0 , ey = 0  */ ;
     
             unsigned bwoff = 0 ;
-            double x_rw[4], y_rw[4], x_fl[4] , y_fl[4] ; 
+//            double x_rw[4], y_rw[4], x_fl[4] , y_fl[4] ; 
 
 /* BUTERWORTH CONSTANTS */
             
-/*
+
 #define B0      0.005886216155
 #define B1      0.017658648465
 #define B2      B1
@@ -265,32 +276,33 @@ int main() {
 #define A3     -0.439220727946
 
 #define AZ0     0
-*/
-           
+
+  
+            /*
             
-#define B0      0.25
+#define B0      0.5
 #define B1      0.0
-#define B2      B1
-#define B3      0.0
+#define B2      0
+#define B3      0
 
-#define A1     -0.25 
-#define A2     -0.25
-#define A3     -0.25            
+#define A1      - 
+#define A2      0.0
+#define A3      0.0            
             
-#define AZ0    0.0            
+#define AZ0     0.0            
 
+            */
             
             
-            
-            double b[4][4] = { { B0  , B3  , B2  , B1 } ,       \
-                               { B1  , B0  , B3  , B2 } ,       \
-                               { B2  , B1  , B0  , B3 } ,       \
-                               { B3  , B2  , B1  , B0 }    } ;
+    double b[4][4] = { { B0  , B3  , B2  , B1 } ,       
+                       { B1  , B0  , B3  , B2 } ,       
+                       { B2  , B1  , B0  , B3 } ,       
+                       { B3  , B2  , B1  , B0 } } ;
 
-            double a[4][4] = { { AZ0 , A3  , A2  , A1  } ,      \            
-                               { A1  , AZ0 , A3  , A2  } ,      \
-                               { A2  , A1  , AZ0 , A3  } ,      \
-                               { B3  , A2  , A1  , AZ0 }   } ;
+    double a[4][4] = { { AZ0 , A3  , A2  , A1  } ,                  
+                       { A1  , AZ0 , A3  , A2  } ,      
+                       { A2  , A1  , AZ0 , A3  } ,      
+                       { B3  , A2  , A1  , AZ0 } } ;
 
             
     while (true) {
@@ -317,11 +329,16 @@ int main() {
         x_rw[bwoff] = currPos.x ;
         y_rw[bwoff] = currPos.y ;
 
-        y_fl[bwoff] = b[bwoff][0]*y_rw[0] + b[bwoff][1]*y_rw[1] +    \ 
-                      b[bwoff][2]*y_rw[2] + b[bwoff][3]*y_rw[3] -    \
-                                                                     \ 
-                      a[bwoff][0]*y_fl[0] - a[bwoff][1]*y_fl[1] -    \ 
-                      a[bwoff][2]*y_fl[2] - a[bwoff][3]*y_fl[3]   ;
+        y_fl[bwoff] = 
+                b[bwoff][0]*y_rw[0] + 
+                b[bwoff][1]*y_rw[1] +     
+                b[bwoff][2]*y_rw[2] + 
+                b[bwoff][3]*y_rw[3] -    
+                                                                      
+                a[bwoff][0]*y_fl[0] - 
+                a[bwoff][1]*y_fl[1] -     
+                a[bwoff][2]*y_fl[2] - 
+                a[bwoff][3]*y_fl[3]   ;
   
         
 //        currPos.y = y_fl[bwoff] ;
@@ -329,17 +346,27 @@ int main() {
 
         double kp = 0.16;
         double kd = 0.000;
+        double ki = 0.02;
 
+        /* -------------- PID Controller calculations --------------*/
         
-        // Calculate et and velocity
         double dt = 0.05; // Unsure abt this value
-        double ex = (currPos.x - setPoint.x) ; // e(t)
+        
+        // Error value
+        double ex = (currPos.x - setPoint.x) ;
         double ey = (currPos.y - setPoint.y) ;
-        double dex = (double) (ex - prevState.ex) / dt; // Velocity
+        
+        // Integral
+        prevState.i_ex += ex * dt;
+        prevState.i_ey += ey * dt;
+        
+        // Velocity value
+        double dex = (double) (ex - prevState.ex) / dt;
         double dey = (double) (ey - prevState.ey) / dt;
 
-        out_x = -kp * ex   - kd * dex   ;
-        out_y = -kp * ey   - kd * dey   ;
+        // PID calculation
+        out_x = -kp * ex * prevState.i_ex - kd * dex;
+        out_y = -kp * ey * prevState.i_ey - kd * dey;
 
         // Save old state
         prevState.x = currPos.x;
@@ -382,7 +409,7 @@ int main() {
         lcd_clear();
         lcd_locate(0, 0);
 //        lcd_printf("X=%04d, Y=%04d", limy, currPos.y);
-                lcd_printf("X=%04d, Y=%d", currPos.y , y_fl[bwoff] );
+                lcd_printf("X=%04d, Y=%f", currPos.y , y_fl[bwoff] );
         lcd_locate(0, 0);
 
           }
