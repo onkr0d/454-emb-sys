@@ -86,7 +86,7 @@ signed int sampleABS() {
     int numSamples = 0;
     signed int samples[4] = {0, 0, 0, 0};
 
-    while (numSamples < 3) {
+    while (numSamples < 1) {
 
         // Joystick value sampling code
         SETBIT(AD1CON1bits.SAMP); // start to sample
@@ -233,9 +233,8 @@ int main() {
     lcd_clear();
 
     int cornerCounter = 0;
-//    struct pos setPoint = {.x = 1594, .y = 1433};
-    struct pos setPoint = {.y = 1594, .x = 1433};
-    //    struct pos setPoint = {.x = 1594, .y = 1600};
+    struct pos setPoint = {.x = 1594, .y = 1433};
+//    struct pos setPoint = {.x = 1594, .y = 1600};
     struct pos currPos = {.x = 0, .y = 0};
     struct state prevState = {.x = 0, .y = 0, .ex = 0, .ey = 0};   
     
@@ -253,9 +252,8 @@ int main() {
             double x_rw[4], y_rw[4], x_fl[4] , y_fl[4] ; 
 
 /* BUTERWORTH CONSTANTS */
-            
-/*
-#define B0      0.005886216155
+
+#define b0      0.005886216155
 #define B1      0.017658648465
 #define B2      B1
 #define B3      B0
@@ -265,37 +263,21 @@ int main() {
 #define A3     -0.439220727946
 
 #define AZ0     0
-*/
-           
-            
-#define B0      0.25
-#define B1      0.0
-#define B2      B1
-#define B3      0.0
 
-#define A1     -0.25 
-#define A2     -0.25
-#define A3     -0.25            
-            
-#define AZ0    0.0            
+            double b[4][4] = ( ( B0  , B3  , B2  , B1 ) ,       \
+                               ( B1  , B0  , B3  , B2 ) ,       \
+                               ( B2  , B1  , B0  , B3 ) ,       \
+                               ( B3  , B2  , B1  , B0 )    } ;
 
-            
-            
-            
-            double b[4][4] = { { B0  , B3  , B2  , B1 } ,       \
-                               { B1  , B0  , B3  , B2 } ,       \
-                               { B2  , B1  , B0  , B3 } ,       \
-                               { B3  , B2  , B1  , B0 }    } ;
-
-            double a[4][4] = { { AZ0 , A3  , A2  , A1  } ,      \            
-                               { A1  , AZ0 , A3  , A2  } ,      \
-                               { A2  , A1  , AZ0 , A3  } ,      \
-                               { B3  , A2  , A1  , AZ0 }   } ;
+            double a[4][4] = ( ( AZ0 , A3  , A2  , A1  ) ,       \            
+                               ( A1  , AZ0 , A3  , A2  ) ,       \
+                               ( A2  , A1  , AZ0 , A3  ) ,       \
+                               ( B3  , A2  , A1  , AZ0 )    } ;
 
             
     while (true) {
 
-        bwoff = ( 1 + bwoff ) % 4 ;
+        bwoff %= 4 ;
 
         
         SETLED(LED1_PORT);
@@ -320,26 +302,26 @@ int main() {
         y_fl[bwoff] = b[bwoff][0]*y_rw[0] + b[bwoff][1]*y_rw[1] +    \ 
                       b[bwoff][2]*y_rw[2] + b[bwoff][3]*y_rw[3] -    \
                                                                      \ 
-                      a[bwoff][0]*y_fl[0] - a[bwoff][1]*y_fl[1] -    \ 
+                      a[bwoff][0]*y_fl[0] - a[bwoff][1]*y_fl[0] -    \ 
                       a[bwoff][2]*y_fl[2] - a[bwoff][3]*y_fl[3]   ;
   
         
-//        currPos.y = y_fl[bwoff] ;
+//        currPos.y = y_f[bwoff] ;
         
 
-        double kp = 0.16;
-        double kd = 0.000;
+        double kp = 0.04;
+        double kd = 0.003;
 
         
         // Calculate et and velocity
-        double dt = 0.05; // Unsure abt this value
+        double dt = 0.2; // Unsure abt this value
         double ex = (currPos.x - setPoint.x) ; // e(t)
         double ey = (currPos.y - setPoint.y) ;
         double dex = (double) (ex - prevState.ex) / dt; // Velocity
         double dey = (double) (ey - prevState.ey) / dt;
 
         out_x = -kp * ex   - kd * dex   ;
-        out_y = -kp * ey   - kd * dey   ;
+        out_y = -kp * ey    - kd * dey   ;
 
         // Save old state
         prevState.x = currPos.x;
@@ -362,9 +344,9 @@ int main() {
 //         OC7R = 1;
           limy =  3700  -  out_y ; 
           limy = limy < 3820 ? limy : 3820  ;
-//          OC7RS = limy > 3580 ? limy : 3580 ;
+          OC7RS = limy > 3580 ? limy : 3580 ;
    
-//          OC7CONbits.OCM = 0b110;
+          OC7CONbits.OCM = 0b110;
                  
                  
                  
@@ -377,18 +359,18 @@ int main() {
                 //                SETBIT(T2CONbits.TON);
  
 
-          if ( 0 == bwoff) {
+/*
         // Display
         lcd_clear();
         lcd_locate(0, 0);
 //        lcd_printf("X=%04d, Y=%04d", limy, currPos.y);
-                lcd_printf("X=%04d, Y=%d", currPos.y , y_fl[bwoff] );
+                lcd_printf("X=%04d, Y=%04d", out_x , out_y );
         lcd_locate(0, 0);
 
-          }
+        
 //        __delay_ms(1850); // not exactly 2 seconds because switching axis adds a 50ms delay, plus other stuff. double check this number before demo!
 
-
+*/
 
         
 
