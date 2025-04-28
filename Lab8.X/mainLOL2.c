@@ -248,9 +248,9 @@ int main() {
         .ey = 0,
         .i_ex = 0,
         .i_ey = 0
-    } ;
-
-
+    };   
+    
+    
     struct cornerPos corner0 = {.x = 0, .y = 0};
     struct cornerPos corner1 = {.x = 0, .y = 0};
     struct cornerPos corner2 = {.x = 0, .y = 0};
@@ -258,26 +258,22 @@ int main() {
 
     SETLED(LED4_PORT);
 
-            signed int y_clipped = 0, out_x = 0 , out_y = 0 /* , ex = 0 , ey = 0  */ ;
+            signed int limy = 0, out_x = 0 , out_y = 0 /* , ex = 0 , ey = 0  */ ;
     
             unsigned bwoff = 0 ;
 //            double x_rw[4], y_rw[4], x_fl[4] , y_fl[4] ; 
 
 /* BUTERWORTH CONSTANTS */
             
-//0.289003621918   0.867010865753  0.867010865753  0.289003621918  
-//1.000000000000   0.751546918407  0.483668797629  0.076813259304  
-            
-//  CUTOFF 6.3 HZ            
-            
-#define B0      0.289003621918 
-#define B1      0.867010865753
+
+#define B0      0.005886216155
+#define B1      0.017658648465
 #define B2      B1
 #define B3      B0
 
-#define A1     0.751546918407
-#define A2     0.483668797629 
-#define A3     0.076813259304
+#define A1     -2.188288161659 
+#define A2      1.674598618846
+#define A3     -0.439220727946
 
 #define AZ0     0
 
@@ -345,12 +341,12 @@ int main() {
                 a[bwoff][3]*y_fl[3]   ;
   
         
-        currPos.y = y_fl[bwoff] ;
+//        currPos.y = y_fl[bwoff] ;
         
 
-        double kp = 0.125;
-        double kd = 0.0;
-        double ki = 0.00;
+        double kp = 0.16;
+        double kd = 0.000;
+        double ki = 0.02;
 
         /* -------------- PID Controller calculations --------------*/
         
@@ -369,8 +365,8 @@ int main() {
         double dey = (double) (ey - prevState.ey) / dt;
 
         // PID calculation
-        out_x = -kp * ex - 0 * prevState.i_ex - kd * dex;
-        out_y = -kp * ey - 0 * prevState.i_ey - kd * dey;
+        out_x = -kp * ex * prevState.i_ex - kd * dex;
+        out_y = -kp * ey * prevState.i_ey - kd * dey;
 
         // Save old state
         prevState.x = currPos.x;
@@ -391,11 +387,11 @@ int main() {
     
          CLEARBIT(TRISDbits.TRISD6);
 //         OC7R = 1;
-          y_clipped =  3700  -  out_y ; 
-          y_clipped = ( ( 3820 > y_clipped ) ? y_clipped : 3820 ) ;
-          y_clipped =  ( (3580 < y_clipped ) ? y_clipped : 3580 ) ;
-          OC7RS =  y_clipped ;
-          OC7CONbits.OCM = 0b110;
+          limy =  3700  -  out_y ; 
+          limy = limy < 3820 ? limy : 3820  ;
+//          OC7RS = limy > 3580 ? limy : 3580 ;
+   
+//          OC7CONbits.OCM = 0b110;
                  
                  
                  
@@ -412,8 +408,8 @@ int main() {
         // Display
         lcd_clear();
         lcd_locate(0, 0);
-//                       lcd_printf("X=%04d, Y=%04d", limy, currPos.y);
-        lcd_printf("X=%f Y=%f", y_rw[bwoff] , y_fl[bwoff] ) ;
+//        lcd_printf("X=%04d, Y=%04d", limy, currPos.y);
+                lcd_printf("X=%04d, Y=%f", currPos.y , y_fl[bwoff] );
         lcd_locate(0, 0);
 
           }

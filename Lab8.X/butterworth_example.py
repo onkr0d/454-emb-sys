@@ -105,20 +105,20 @@ def plotFFT(xf, yf, signal_band=None, noise_band=None):
 # Generate time axis for a 500 Hz sampled signal between -2 and 2 seconds
 fc = 20.0
 Tc = 1/fc
-time_start = -2.0
-time_end = 2.0
+time_start = -20.0
+time_end = 20.0
 N = (time_end - time_start) / Tc
 t = np.linspace(time_start, time_end, num=int(N), endpoint=False)
 
 # Generate sampled signal: a sinusoid with main component at 5 Hz
-s_hz = 5
+s_hz = 1
 s = 0 * 1.5 + 0.8*np.sin(2 * np.pi * s_hz * t)
 
 # Now generate very messy noise with 100 components in the band 20 Hz to 123 Hz
 n = 0 
 num_noise_comp = 100
-noise_lo_hz = 20.0
-noise_hi_hz = 123.0
+noise_lo_hz = 5.0
+noise_hi_hz = 10.0
 n = 10 * utils.noise(t, noise_lo_hz, noise_hi_hz, num_noise_comp)
 noise_band = np.linspace(noise_lo_hz, noise_hi_hz, num_noise_comp)
 
@@ -147,12 +147,13 @@ print(b)
 
 s_filt = signal.lfilter(b, a, s+n)
 
-print( (s+n)[-6:] )
+print( s_filt[-6:] )
+print(  (s+n)[-6:] )
 
 print(a)
 
-#print( sum( ( s+n)[-6:] * b ) )
-#print( sum( s_filt[-6:] * a[::-1] ) )
+print( sum( ( s+n)[-4:] * b ) )
+print( sum( s_filt[-4:] * a[::-1] ) )
 
 
 
