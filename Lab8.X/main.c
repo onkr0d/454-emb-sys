@@ -142,7 +142,8 @@ void t2cycle(uint16_t amount) { // wait 20 ms
     }
 }
 
-double x_rw[4], y_rw[4], x_fl[4] , y_fl[4] = { 0.0 , 0.0 , 0.0 , 0.0 } ;
+double x_rw[4],     y_rw[4] = { 0.0 , 0.0 , 0.0 , 0.0 } ,
+          x_fl[4] , y_fl[4] = { 0.0 , 0.0 , 0.0 , 0.0 } ;
 
 int main() {
     /* LCD Initialization Sequence */
@@ -219,7 +220,7 @@ int main() {
     CLEARBIT(T3CONbits.TGATE);
     TMR3 = 0;
     T3CONbits.TCKPS = 0b11;     // divide by 256
-    PR3 = 50000  - 1 ;
+    PR3 = 0xffff ;
     CLEARBIT(IFS0bits.T3IF);
     CLEARBIT(IEC0bits.T3IE);
 
@@ -297,27 +298,45 @@ int main() {
 
             */
             
-            
-    double b[4][4] = { { B0  , B3  , B2  , B1 } ,       
-                       { B1  , B0  , B3  , B2 } ,       
-                       { B2  , B1  , B0  , B3 } ,       
-                       { B3  , B2  , B1  , B0 } } ;
+//    double b[4][4] = { { B0  , B1  , B2  , B1 } ,               
+    double b[4] =  { B0  , B1  , B2  , B3 } ;       
+//                       { B1  , B0  , B3  , B2 } ,       
+//                       { B2  , B1  , B0  , B3 } ,       
+//                       { B3  , B2  , B1  , B0 } } ;
 
-    double a[4][4] = { { AZ0 , A3  , A2  , A1  } ,                  
-                       { A1  , AZ0 , A3  , A2  } ,      
-                       { A2  , A1  , AZ0 , A3  } ,      
-                       { A3  , A2  , A1  , AZ0 } } ;
+//     double a[4][4] = { { AZ0 , A3  , A2  , A1  } ,  
+    double a[4] =  { AZ0 , A1  , A2  , A3  } ;                  
+//                       { A1  , AZ0 , A3  , A2  } ,      
+//                       { A2  , A1  , AZ0 , A3  } ,      
+//                       { A3  , A2  , A1  , AZ0 } } ;
 
-            
+    uint16_t lastT3 = TMR3 , nowT3 ;
+         
+    
+    unsigned togLED1 = 0 ;
+    
     while (true) {
 
         bwoff = ( 1 + bwoff ) % 4 ;
 
-        
-        SETLED(LED1_PORT);
+              togLED1 = ( 1 + togLED1 ) % 20 ;
+              if ( 10 > togLED1 ) 
+                  SETBIT(   LED1_PORT ) ;
+              else 
+                  CLEARBIT( LED1_PORT) ;
+
+              
+//        SETLED(LED1_PORT);
 //        t2cycle(2);
-                __delay_ms(26);
-        CLEARLED(LED1_PORT);
+
+        
+         for( nowT3 = TMR3 ; nowT3 - lastT3 < 2500 ; nowT3 = TMR3 ) ;
+         if (2500 > nowT3 - lastT3 ) 
+             SETBIT(LED5_PORT);
+         lastT3 = nowT3 ;
+        
+//        __delay_ms(26);
+//        CLEARLED(LED1_PORT);
         //        t2cycle(50); 
 
         //        __delay_ms(700);
@@ -330,25 +349,38 @@ int main() {
         switchToXAxis(false);
         currPos.y = sampleABS();
         
-        x_rw[bwoff] = currPos.x ;
-        y_rw[bwoff] = currPos.y ;
 
-        y_fl[bwoff] = 
-                b[bwoff][0]*y_rw[0] + 
-                b[bwoff][1]*y_rw[1] +     
-                b[bwoff][2]*y_rw[2] + 
-                b[bwoff][3]*y_rw[3] -    
-                                                                      
-                a[bwoff][0]*y_fl[0] - 
-                a[bwoff][1]*y_fl[1] -     
-                a[bwoff][2]*y_fl[2] - 
-                a[bwoff][3]*y_fl[3]   ;
+        
+        
+ 
+        y_rw[3] = y_rw[2];   
+        y_rw[2] = y_rw[1];   
+        y_rw[1] = y_rw[0];   
+
+        
+        x_rw[0] = currPos.x ;
+        y_rw[0] = currPos.y ;
+
+        y_fl[3] = y_fl[2];   
+        y_fl[2] = y_fl[1];   
+        y_fl[1] = y_fl[0];   
+
+        
+        
+        y_fl[0] = 
+                b[0]*y_rw[0] + 
+                b[1]*y_rw[1] +     
+                b[2]*y_rw[2] + 
+                b[3]*y_rw[3] -                                 
+                a[1]*y_fl[1] -     
+                a[2]*y_fl[2] - 
+                a[3]*y_fl[3]   ;
   
         
         currPos.y = y_fl[bwoff] ;
         
 
-        double kp = 0.125;
+        double kp = 1.0;
         double kd = 0.0;
         double ki = 0.00;
 
