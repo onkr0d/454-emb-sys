@@ -84,9 +84,9 @@ signed int sampleABS() {
     SETLED(LED4_PORT);
 
     int numSamples = 0;
-    signed int samples[5] = {0, 0, 0, 0, 0};
+    signed int samples[3] = {0, 0, 0, 0, 0};
 
-    while (numSamples < 5 ) {
+    while (numSamples < 3 ) {
 
         // Joystick value sampling code
         SETBIT(AD1CON1bits.SAMP); // start to sample
@@ -107,7 +107,7 @@ signed int sampleABS() {
     // median of samples
 //    qsort(samples, 3, sizeof (signed int), compareInts);
     CLEARLED(LED4_PORT);
-    return samples[2];
+    return samples[1];
 }
 
 struct pos {
@@ -152,7 +152,7 @@ int main() {
     // LED setup
     CLEARBIT(LED1_TRIS); // Set Pin to Output
     CLEARBIT(LED2_TRIS); // Set Pin to Output
-    CLEARBIT(LED3_TRIS); // Set ;Pin to Output
+    CLEARBIT(LED3_TRIS); // Set Pin to Output
     CLEARBIT(LED4_TRIS); // Set Pin to Output
     CLEARBIT(LED5_TRIS); // Set Pin to Output
 
@@ -235,7 +235,7 @@ int main() {
     lcd_clear();
 
 //    struct pos setPoint = {.x = 1600, .y = 1470};
-    struct pos setPoint = {.x = 1602, .y = 1591};
+    struct pos setPoint = {.x = 1600, .y = 1520};
     struct pos currPos = {.x = 0, .y = 0};
     struct state prevState = 
     {
@@ -261,7 +261,7 @@ int main() {
 //1.000000000000   0.751546918407  0.483668797629  0.076813259304  
             
 //  CUTOFF 6.3 HZ            
-/*           
+  /*         
 #define B0      0.289003621918 
 #define B1      0.867010865753
 #define B2      B1
@@ -272,25 +272,25 @@ int main() {
 #define A1     0.076813259304
 
 #define AZ0     0
-
-     
 */
+          
+
 
 
 // cutoff 2.1
-/*           
+  /*          
 #define B0      0.020483504914  
 #define B1      0.061450514743 
 #define B2      B1
 #define B3      B0
-;
+
 #define A1     -1.699513191903 
 #define A2      1.123447819405
 #define A3     -0.260066588186          
             
 #define AZ0     0.0    
-
 */
+
 
 // cutoff 3.4
             
@@ -306,18 +306,21 @@ int main() {
 #define AZ0     0.0    
 
 
-
+/*
             
 // cutoff 1.3
-/*            
+            
 #define B0      0.005886216155
 #define B1      0.017658648465 
-#define B2      B1;
-#define B3      B0
+#define B2      B1
+#define B3      B0ate.i_ex += ex * dt;
+        prevState.i_ey += ey * dt;
 
 #define A1      -2.188288161659 
 #define A2      1.674598618846 
-#define A3      -0.439220727946        
+#define A3      -0.439220727946         
+            ate.i_ex += ex * dt;
+        prevState.i_ey += ey * dt;
 #define AZ0     0.0            
 */
             
@@ -338,10 +341,9 @@ int main() {
 #define AZ0     0.0                 
             */
 
-    
 // cutoff 0.3            
-/* 
-#define B0      0.000095442508 ;
+       /*     
+#define B0      0.000095442508 
 #define B1      0.000286327525
 #define B2      B1            
 #define B3      B0
@@ -352,8 +354,8 @@ int main() {
             
 #define AZ0     0.0    
             
-  */                    
-
+                      
+         */   
             
                         
     double x_rw[4] = { 0.0 } ,
@@ -417,7 +419,7 @@ int main() {
         /* ------ Butterworth below here ------  */
   //      bwoff = ( 1 + bwoff ) % 4 ;
         
-        ;
+        
         x_rw[3]=x_rw[2];
         x_rw[2]=x_rw[1];
         x_rw[1]=x_rw[0];
@@ -478,30 +480,15 @@ int main() {
         currPos.y = y_fl[bwoff];
 
         /* -------------- PID Controller calculations --------------*/
- 
-        double x_kp = 0.15;
-        double x_kd = 2.6;
-        double x_ki = 1.4;
+        double x_kp = 0.05;
+        double x_kd = 0.1;
+        double x_ki = 0.0;
 
-        double y_kp = 0.15;
+        double y_kp = 0.03;
         double y_kd = 0.05;
         double y_ki = 0.0;
+
         
-/*
-
-        double x_kp = 0.07;
-        double x_kd = 0.2;
-        double x_ki = 0.1;
-
-        double y_kp = 0.02;
-        double y_kd = 0.01;
-        double y_ki = 0.0;
-
-        double y_kp = 0.07;
-        double y_kd = 0.2;
-        double y_ki = 0.7;        
-*/
-
         
         double dt = 1 / 20.0 ;
         
@@ -515,8 +502,8 @@ int main() {
 //        prevState.i_ey += ey * dt;
 
 
-        prevState.i_ex += 0.02 * ( ex - prevState.i_ex ) ;
-        prevState.i_ey += 0.02 * ( ey - prevState.i_ey ) ;
+        prevState.i_ex += 0.05 * ( ex - prevState.i_ex ) ;
+        prevState.i_ey += 0.05 * ( ey - prevState.i_ey ) ;
         
         
         // Velocity value
@@ -528,11 +515,11 @@ int main() {
         out_y = -y_kp * ey - y_ki * prevState.i_ey - y_kd * dey;
         
         // Clamp PID outputs
-        if (out_x > 10) out_x = 10;
-        if (out_x < -10) out_x = -10;
+        if (out_x > 200) out_x = 200;
+        if (out_x < -150) out_x = -200;
 
-        if (out_y > 10) out_y = 10;
-        if (out_y < -10) out_y = -10;
+        if (out_y > 200) out_y = 200;
+        if (out_y < -200) out_y = -200;
 
         // Save old state
         prevState.x = currPos.x;
@@ -540,34 +527,31 @@ int main() {
         prevState.ex = ex;
         prevState.ey = ey;
       
-        if ( 1 + 0  * (1 > togLED1 % 2 )  ) { 
-            
-            
-            
-            CLEARBIT(TRISDbits.TRISD6);
-            y_clipped =  3670 - 1 * out_y ; 
-    //        y_clipped = ( ( 3820 > y_clipped ) ? y_clipped : 3820 ) ;
-    //        y_clipped =  ( (3580 < y_clipped ) ? y_clipped : 3580 ) ;
+    
+        CLEARBIT(TRISDbits.TRISD6);
+        y_clipped =  3670 -  1 * out_y ; 
+//        y_clipped = ( ( 3820 > y_clipped ) ? y_clipped : 3820 ) ;
+//        y_clipped =  ( (3580 < y_clipped ) ? y_clipped : 3580 ) ;
 
-//            y_clipped = ( ( 3695 > y_clipped ) ? y_clipped : 3695 ) ;
-//            y_clipped =  ( (3645 < y_clipped ) ? y_clipped : 3645 ) ;
+        y_clipped = ( ( 3695 > y_clipped ) ? y_clipped : 3695 ) ;
+        y_clipped =  ( (3645 < y_clipped ) ? y_clipped : 3645 ) ;
 
 
-            OC7RS =  y_clipped ;
+        OC7RS =  y_clipped ;
 
 
-            CLEARBIT(TRISDbits.TRISD7);
-            x_clipped =  3665  -  1 * out_x ; 
-    //        x_clipped = ( ( 3820 > x_clipped ) ? x_clipped : 3820 ) ;
-    //        x_clipped =  ( (3580 < x_clipped ) ? x_clipped : 3580 ) ;
+        CLEARBIT(TRISDbits.TRISD7);
+        x_clipped =  3665  -  1 * out_x ; 
+//        x_clipped = ( ( 3820 > x_clipped ) ? x_clipped : 3820 ) ;
+//        x_clipped =  ( (3580 < x_clipped ) ? x_clipped : 3580 ) ;
 
-//            x_clipped = ( ( 3690 > x_clipped ) ? x_clipped : 3690 ) ;
-//            x_clipped =  ( (3640 < x_clipped ) ? x_clipped : 3640 ) ;
+        x_clipped = ( ( 3690 > x_clipped ) ? x_clipped : 3690 ) ;
+        x_clipped =  ( (3640 < x_clipped ) ? x_clipped : 3640 ) ;
 
 
-            OC8RS =  x_clipped ;
-
-        }
+        OC8RS =  x_clipped ;
+     
+          
 
         if ( 19 == togLED1 )  {
           // Display
