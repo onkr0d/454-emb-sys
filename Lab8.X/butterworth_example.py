@@ -133,7 +133,7 @@ plotFFT(xf, yf, [0, s_hz], [noise_lo_hz, noise_hi_hz])
 N_ord = 3
 
 # Set the filter cutoff in Hz
-f_cutoff = 1.3
+f_cutoff = 2.1
 
 # Compute percentage w.r.t. Nyquist frequency
 wn = f_cutoff * 2/fc

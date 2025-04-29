@@ -69,8 +69,8 @@ void switchToXAxis(bool xAxis) {
 }
 
 int compareInts(const void *a, const void *b) {
-    unsigned int int_a = *(const signed int *) a;
-    unsigned int int_b = *(const signed int *) b;
+    unsigned int int_a = *(const unsigned int *) a;
+    unsigned int int_b = *(const unsigned int *) b;
     if (int_a < int_b) return -1;
     if (int_a > int_b) return 1;
     return 0;
@@ -84,7 +84,7 @@ signed int sampleABS() {
     SETLED(LED4_PORT);
 
     int numSamples = 0;
-    signed int samples[5] = {0, 0, 0, 0, 0};
+    signed int samples[4] = {0, 0, 0, 0};
 
     while (numSamples < 3) {
 
@@ -98,16 +98,16 @@ signed int sampleABS() {
 
         while (!AD1CON1bits.DONE); // wait for conversion to finish
         // reduce risk of ADC sampling
-        signed int val = ADC1BUF0;
+        unsigned int val = ADC1BUF0;
         CLEARBIT(AD1CON1bits.DONE); // MUST HAVE! clear conversion done bit
         samples[numSamples] = val;
         numSamples++;
     }
 
     // median of samples
-    qsort(samples, 5, sizeof (signed int), compareInts);
+//    qsort(samples, 3, sizeof (unsigned int), compareInts);
     CLEARLED(LED4_PORT);
-    return samples[2];
+    return samples[0];
 }
 
 struct pos {
@@ -138,10 +138,14 @@ void t2cycle(uint16_t amount) { // wait 20 ms
 
         while (tStart != TMR2);
 
+
     }
 }
 
-
+double x_rw[4] = { 0.0 , 0.0 , 0.0 , 0.0 } ,
+        y_rw[4] = { 0.0 , 0.0 , 0.0 , 0.0 } ,
+          x_fl[4] = { 0.0 , 0.0 , 0.0 , 0.0 } , 
+             y_fl[4] = { 0.0 , 0.0 , 0.0 , 0.0 } ;
 
 int main() {
     /* LCD Initialization Sequence */
@@ -218,7 +222,7 @@ int main() {
     CLEARBIT(T3CONbits.TGATE);
     TMR3 = 0;
     T3CONbits.TCKPS = 0b11;     // divide by 256
-    PR3 = 0xffff;
+    PR3 = 0xffff ;
     CLEARBIT(IFS0bits.T3IF);
     CLEARBIT(IEC0bits.T3IE);
 
@@ -234,7 +238,10 @@ int main() {
 
     lcd_clear();
 
-    struct pos setPoint = {.x = 1600, .y = 1470};
+    int cornerCounter = 0;
+    struct pos setPoint = {.x = 1594, .y = 1433};
+//    struct pos setPoint = {.y = 1594, .x = 1433};
+    //    struct pos setPoint = {.x = 1594, .y = 1600};
     struct pos currPos = {.x = 0, .y = 0};
     struct state prevState = 
     {
@@ -247,12 +254,18 @@ int main() {
     } ;
 
 
+    struct cornerPos corner0 = {.x = 0, .y = 0};
+    struct cornerPos corner1 = {.x = 0, .y = 0};
+    struct cornerPos corner2 = {.x = 0, .y = 0};
+    struct cornerPos corner3 = {.x = 0, .y = 0};
+
     SETLED(LED4_PORT);
 
-    signed int x_clipped = 0 , y_clipped = 0,
-    out_x = 0 , out_y = 0 /* , ex = 0 , ey = 0  */ ;
-
-    unsigned bwoff = 0 ;
+            signed int x_clipped = 0 , y_clipped = 0,
+              out_x = 0 , out_y = 0 /* , ex = 0 , ey = 0  */ ;
+    
+            unsigned bwoff = 0 ;
+//            double x_rw[4], y_rw[4], x_fl[4] , y_fl[4] ; 
 
 /* BUTERWORTH CONSTANTS */
             
@@ -352,50 +365,49 @@ int main() {
          */   
             
                         
-    double x_rw[4] = { 0.0 } ,
-        y_rw[4] = { 0.0 } ,
-        x_fl[4] = { 0.0 } , 
-        y_fl[4] = { 0.0 } ;
-    
+//    double b[4][4] = { { B0  , B1  , B2  , B1 } ,               
     double b[4] =  { B0  , B1  , B2  , B3 } ;       
-    double a[4] =  { AZ0 , A1  , A2  , A3  } ;  
-        
+//                       { B1  , B0  , B3  , B2 } ,       
+//                       { B2  , B1  , B0  , B3 } ,       
+//                       { B3  , B2  , B1  , B0 } } ;
+
+//     double a[4][4] = { { AZ0 , A3  , A2  , A1  } ,  
+    double a[4] =  { AZ0 , A1  , A2  , A3  } ;                  
+//                       { A1  , AZ0 , A3  , A2  } ,      
+//                       { A2  , A1  , AZ0 , A3  } ,      
+//                       { A3  , A2  , A1  , AZ0 } } ;
+
     uint16_t lastT3 = TMR3 , nowT3 ;
+         
     
     unsigned togLED1 = 0 ;
-    SETBIT(LED3_PORT);    
-    
-    switchToXAxis(true);
-    currPos.x = sampleABS();
-    switchToXAxis(false);
-    currPos.y = sampleABS();
-
-    int loop;
-    for (loop = 0; loop < 4; loop++) {
-        x_rw[loop] = currPos.x;
-        y_rw[loop] = currPos.y;
-        x_fl[loop] = currPos.x;
-        y_fl[loop] = currPos.y;
-    }
-
-    
-    
-    OC7CONbits.OCM = 0b110;
-    OC8CONbits.OCM = 0b110;
-    
+             SETBIT(LED3_PORT);    
     while (true) {
-        togLED1 = ( 1 + togLED1 ) % 20 ;
-        if ( 10 > togLED1 ) 
-            SETBIT(   LED1_PORT ) ;
-        else 
-            CLEARBIT( LED1_PORT) ;
+
+        bwoff = ( 1 + bwoff ) % 4 ;
+              togLED1 = ( 1 + togLED1 ) % 20 ;
+              if ( 10 > togLED1 ) 
+                  SETBIT(   LED1_PORT ) ;
+              else 
+                  CLEARBIT( LED1_PORT) ;
+
+              
+//        SETLED(LED1_PORT);
+//        t2cycle(2);
+
         
          for( nowT3 = TMR3 ; nowT3 - lastT3 < 2500 ; nowT3 = TMR3 ) ;
          if (2500 > nowT3 - lastT3 ) 
              SETBIT(LED5_PORT);
          lastT3 = nowT3 ;
         
+//        __delay_ms(26);
+//        CLEARLED(LED1_PORT);
+        //        t2cycle(50); 
+
+        //        __delay_ms(700);
         CLEARLED(LED2_PORT);
+//        __delay_ms(500);
 
         // Sampling
         switchToXAxis(true);
@@ -404,60 +416,99 @@ int main() {
         currPos.y = sampleABS();
         
 
-        /* ------ Butterworth below here ------  */
-        bwoff = ( 1 + bwoff ) % 4 ;
-        
-        x_rw[bwoff] = currPos.x;
-        y_rw[bwoff] = currPos.y;
-        
-        int idx0 = (bwoff + 0) % 4;
-        int idx1 = (bwoff - 1 + 4) % 4;
-        int idx2 = (bwoff - 2 + 4) % 4;
-        int idx3 = (bwoff - 3 + 4) % 4;
-       
-       
-        x_fl[bwoff] =
-            b[0] * x_rw[idx0] +
-            b[1] * x_rw[idx1] +
-            b[2] * x_rw[idx2] +
-            b[3] * x_rw[idx3]
-          - a[1] * x_fl[idx1]
-          - a[2] * x_fl[idx2]
-          - a[3] * x_fl[idx3];
-        
-        y_fl[bwoff] =
-            b[0] * y_rw[idx0] +
-            b[1] * y_rw[idx1] +
-            b[2] * y_rw[idx2] +
-            b[3] * y_rw[idx3]
-          - a[1] * y_fl[idx1]
-          - a[2] * y_fl[idx2]
-          - a[3] * y_fl[idx3];
-        
-        currPos.x = x_fl[bwoff];
-        currPos.y = y_fl[bwoff];
+  
+        x_rw[3] = x_rw[2];   
+        x_rw[2] = x_rw[1];   
+        x_rw[1] = x_rw[0];   
 
-        /* -------------- PID Controller calculations --------------*/
-        double x_kp = 0.05;
-        double x_kd = 0.00;
+        
+//        uint16_t x_clipped = currPos.x;
+        
+//          x_clipped = ( ( 3000 > x_clipped ) ? x_clipped : 3000 ) ;
+//          x_clipped =  ( ( 200 < x_clipped ) ? x_clipped : 200 ) ;
+
+//          x_rw[0] = x_clipped ;
+        
+        x_rw[0] = currPos.y ;
+
+
+        x_fl[3] = x_fl[2];   
+        x_fl[2] = x_fl[1];   
+        x_fl[1] = x_fl[0];   
+
+        
+        
+        x_fl[0] = 
+                b[0]*x_rw[0] + 
+                b[1]*x_rw[1] +     
+                b[2]*x_rw[2] + 
+                b[3]*x_rw[3] -                                 
+                a[1]*x_fl[1] -     
+                a[2]*x_fl[2] - 
+                a[3]*x_fl[3]   ;
+        
+
+
+        
+        
+ 
+        y_rw[3] = y_rw[2];   
+        y_rw[2] = y_rw[1];   
+        y_rw[1] = y_rw[0];   
+
+        
+//        uint16_t y_clipped = currPos.y;
+        
+//          y_clipped = ( ( 3000 > y_clipped ) ? y_clipped : 3000 ) ;
+ //         y_clipped =  ( ( 200 < y_clipped ) ? y_clipped : 200 ) ;
+
+
+ //         y_rw[0] = y_clipped ;
+        
+       y_rw[0] = currPos.y ;
+
+        y_fl[3] = y_fl[2];   
+        y_fl[2] = y_fl[1];   
+        y_fl[1] = y_fl[0];   
+      
+        
+        y_fl[0] = 
+                b[0]*y_rw[0] + 
+                b[1]*y_rw[1] + 
+                b[2]*y_rw[2] + 
+                b[3]*y_rw[3] -                                 
+                a[1]*y_fl[1] -     
+                a[2]*y_fl[2] - 
+                a[3]*y_fl[3]   ;
+  
+        
+        currPos.y = y_fl[bwoff] ;
+        
+
+        double x_kp = 0.3;
+        double x_kd = 0.1;
         double x_ki = 0.0;
 
-        double y_kp = 0.05;
+        double y_kp = 0.0;
         double y_kd = 0.00;
         double y_ki = 0.0;
-
         
         
-        double dt = 1 / 20.0 ;
+        /* -------------- PID Controller calculations --------------*/
+        
+        double dt = 1 / 20.0 ; // Unsure abt this value
         
         // Error value
         double ex = (currPos.x - setPoint.x) ;
         double ey = (currPos.y - setPoint.y) ;
         
+        // FOO ?!?
+//        prevState.i_x = ex ;
+//        prevState.i_y = ey ;
         
-        // Integral
-        prevState.i_ex += ex * dt;
-        prevState.i_ey += ey * dt;
+       // Integral
+        prevState.i_ex += ex;
+        prevState.i_ey += ey;
 
 
         // Velocity value
@@ -467,13 +518,6 @@ int main() {
         // PID calculation
         out_x = -x_kp * ex - x_ki * prevState.i_ex - x_kd * dex;
         out_y = -y_kp * ey - y_ki * prevState.i_ey - y_kd * dey;
-        
-        // Clamp PID outputs
-        if (out_x > 200) out_x = 200;
-        if (out_x < -150) out_x = -200;
-
-        if (out_y > 200) out_y = 200;
-        if (out_y < -200) out_y = -200;
 
         // Save old state
         prevState.x = currPos.x;
@@ -481,30 +525,77 @@ int main() {
         prevState.ex = ex;
         prevState.ey = ey;
       
+        
+        int corner = cornerCounter % 4;
+
     
-        CLEARBIT(TRISDbits.TRISD6);
-        y_clipped =  3700  -  out_y ; 
-        y_clipped = ( ( 3820 > y_clipped ) ? y_clipped : 3820 ) ;
-        y_clipped =  ( (3580 < y_clipped ) ? y_clipped : 3580 ) ;
-        OC7RS =  y_clipped ;
-
-
-        CLEARBIT(TRISDbits.TRISD7);
-        x_clipped =  3700  -  out_x ; 
-        x_clipped = ( ( 3820 > x_clipped ) ? x_clipped : 3820 ) ;
-        x_clipped =  ( (3580 < x_clipped ) ? x_clipped : 3580 ) ;
-        OC8RS =  x_clipped ;
-     
+         CLEARBIT(TRISDbits.TRISD6);
+//         OC7R = 1;
+          y_clipped =  3700  -  out_y ; 
+          y_clipped = ( ( 3820 > y_clipped ) ? y_clipped : 3820 ) ;
+          y_clipped =  ( (3580 < y_clipped ) ? y_clipped : 3580 ) ;
+          OC7RS =  y_clipped ;
+          OC7CONbits.OCM = 0b110;
+                 
+                   CLEARBIT(TRISDbits.TRISD7);
+//         OC7R = 1;
+          x_clipped =  3700  -  out_x ; 
+          x_clipped = ( ( 3820 > x_clipped ) ? x_clipped : 3820 ) ;
+          x_clipped =  ( (3580 < x_clipped ) ? x_clipped : 3580 ) ;
+          OC8RS =  x_clipped ;
+          OC8CONbits.OCM = 0b110;       
           
+          
+          
+          
+                 
+                //                SETBIT(T2CONbits.TON);
 
-        if ( 19 == togLED1 )  {
-          // Display
-          lcd_clear();
-          lcd_locate(0, 0);
-//          lcd_printf("%.4e %.4e", x_fl[0] , x_fl[1] ) ;
-          lcd_printf("X=%04d Y=%04d", currPos.x, currPos.y);
-          lcd_locate(0, 0);
-        }
+//                CLEARBIT(TRISDbits.TRISD7);
+//                OC8R = 1;
+//                OC8RS = 3700;
+//                OC8CONbits.OCM = 0b110;
+                //                SETBIT(T2CONbits.TON);
+ 
+
+          if ( 19 == togLED1 )  {
+        // Display
+        lcd_clear();
+        lcd_locate(0, 0);
+//                       lcd_printf("X=%04d, Y=%04d", limy, currPos.y);
+        lcd_printf("%.4e %.4e", x_fl[0] , x_fl[1] ) ;
+                lcd_locate(0, 1);
+               lcd_printf("%.4e %.4e", x_fl[2] , x_fl[3] ) ;
+        lcd_locate(0, 2);
+       lcd_printf("%.4e %.4e", x_rw[0] , x_rw[1] ) ;
+               lcd_locate(0, 3);
+              lcd_printf("%.4e %.4e", x_rw[2] , x_rw[3] ) ;
+        
+              while(1);
+        
+        
+        
+        lcd_locate(0, 0);
+
+          }
+//        __delay_ms(1850); // not exactly 2 seconds because switching axis adds a 50ms delay, plus other stuff. double check this number before demo!
+
+
+
+        
+
+        // below: buncha crap to 'flush' out the buffer, or whatever
+        //        switchToXAxis(true);
+        //        sampleABS();
+        //        switchToXAxis(false);
+        //        sampleABS();
+
+        //        t2cycle( 5 * 50 );
+
+        //        switchToXAxis(true);
+        //        sampleABS();
+        //        switchToXAxis(false);
+        //        sampleABS();
     }
     return 0;
 }
