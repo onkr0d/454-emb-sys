@@ -98,12 +98,9 @@ def plotFFT(xf, yf, signal_band=None, noise_band=None):
     plt.show()
 
 
-
-
-
 ### PART 1: Simple signal at 500 Hz and random noise between 10 and 123 Hz ###
 # Generate time axis for a 500 Hz sampled signal between -2 and 2 seconds
-fc = 20.0
+fc = 500.0
 Tc = 1/fc
 time_start = -2.0
 time_end = 2.0
@@ -112,14 +109,14 @@ t = np.linspace(time_start, time_end, num=int(N), endpoint=False)
 
 # Generate sampled signal: a sinusoid with main component at 5 Hz
 s_hz = 5
-s = 0 * 1.5 + 0.8*np.sin(2 * np.pi * s_hz * t)
+s = 1.5 + 10*np.sin(2 * np.pi * s_hz * t)
 
 # Now generate very messy noise with 100 components in the band 20 Hz to 123 Hz
 n = 0 
 num_noise_comp = 100
 noise_lo_hz = 20.0
 noise_hi_hz = 123.0
-n = 10 * utils.noise(t, noise_lo_hz, noise_hi_hz, num_noise_comp)
+n = utils.noise(t, noise_lo_hz, noise_hi_hz, num_noise_comp)
 noise_band = np.linspace(noise_lo_hz, noise_hi_hz, num_noise_comp)
 
 xf, yf = getFFT(s+n, fc)
@@ -133,7 +130,7 @@ plotFFT(xf, yf, [0, s_hz], [noise_lo_hz, noise_hi_hz])
 N_ord = 3
 
 # Set the filter cutoff in Hz
-f_cutoff = 6.3
+f_cutoff = 6
 
 # Compute percentage w.r.t. Nyquist frequency
 wn = f_cutoff * 2/fc
@@ -141,57 +138,7 @@ wn = f_cutoff * 2/fc
 # Get the signal coefficients
 b, a = signal.butter(N_ord, wn, 'low', analog=False)
 
-print(b)
-
-
-
 s_filt = signal.lfilter(b, a, s+n)
-
-print( (s+n)[-6:] )
-
-print(a)
-
-#print( sum( ( s+n)[-6:] * b ) )
-#print( sum( s_filt[-6:] * a[::-1] ) )
-
-
-
-arr1 = np.array([1, 2, 3])
-
-arr2 = np.array([4, 5, 6])
-
-arr = np.concatenate((arr1, arr2))
-
-#print(arr) 
-
-
-
-
-#arr1 = np.array([1, 2, 3])
-
-#arr2 = np.array([7, 5, 6])
-
-#arr1 = np.array( a )
-# arr2 = np.array( b )
-
-#print ( a[0] , a[1] , a[2] , a[3] , a[4] , a[5] )
-
-#print( arr2 )
-print( np.concatenate( ( a , b ) ) ) 
-
-vtest = [ 1 , 4 , 3 ]
-print( vtest , vtest[-1] )
-
-print( ( a , b  )  )
-
-print( np.concatenate( ( [  N_ord ] , vtest ) ) )
-
-print( a ) 
-print( b )
-
-print(f"{ b[0]:.12f}   { b[1]:.12f}  { b[2]:.12f}  { b[3]:.12f}  " )
-print(f"{ a[0]:.12f}   { a[1]:.12f}  { a[2]:.12f}  { a[3]:.12f}  " )
-
 
 plotSignal(t, s_filt, "Filtered signal.")
 
@@ -200,8 +147,4 @@ xf, yf = getFFT(s_filt, fc)
 plotFFT(xf, yf, [0, s_hz], [noise_lo_hz, noise_hi_hz])
 
 # Now let's compare the original signal and the filtered time signal
-plotMultipleSignals(t, s+n, 'blue', s_filt, 'red', "Comparison btw original and filtered signal.")
-
-#   print(f"t: {t:.2f}, x: {x:.3f},\ty: {y:.3f},\tax: {angle_x:.3f},\tay: {angle_y:.3f}")
-
-
+plotMultipleSignals(t, s, 'blue', s_filt, 'red', "Comparison btw original and filtered signal.")

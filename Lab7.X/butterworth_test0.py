@@ -98,12 +98,9 @@ def plotFFT(xf, yf, signal_band=None, noise_band=None):
     plt.show()
 
 
-
-
-
 ### PART 1: Simple signal at 500 Hz and random noise between 10 and 123 Hz ###
 # Generate time axis for a 500 Hz sampled signal between -2 and 2 seconds
-fc = 20.0
+fc = 500.0
 Tc = 1/fc
 time_start = -2.0
 time_end = 2.0
@@ -130,10 +127,10 @@ plotFFT(xf, yf, [0, s_hz], [noise_lo_hz, noise_hi_hz])
 ### PART 2: Butterworth Filter Design ###
 
 # Set the filter order
-N_ord = 3
+N_ord = 5
 
 # Set the filter cutoff in Hz
-f_cutoff = 6.3
+f_cutoff = 6
 
 # Compute percentage w.r.t. Nyquist frequency
 wn = f_cutoff * 2/fc
@@ -151,46 +148,11 @@ print( (s+n)[-6:] )
 
 print(a)
 
-#print( sum( ( s+n)[-6:] * b ) )
-#print( sum( s_filt[-6:] * a[::-1] ) )
+print( sum( ( s+n)[-6:] * b ) )
+print( sum( s_filt[-6:] * a[::-1] ) )
 
 
 
-arr1 = np.array([1, 2, 3])
-
-arr2 = np.array([4, 5, 6])
-
-arr = np.concatenate((arr1, arr2))
-
-#print(arr) 
-
-
-
-
-#arr1 = np.array([1, 2, 3])
-
-#arr2 = np.array([7, 5, 6])
-
-#arr1 = np.array( a )
-# arr2 = np.array( b )
-
-#print ( a[0] , a[1] , a[2] , a[3] , a[4] , a[5] )
-
-#print( arr2 )
-print( np.concatenate( ( a , b ) ) ) 
-
-vtest = [ 1 , 4 , 3 ]
-print( vtest , vtest[-1] )
-
-print( ( a , b  )  )
-
-print( np.concatenate( ( [  N_ord ] , vtest ) ) )
-
-print( a ) 
-print( b )
-
-print(f"{ b[0]:.12f}   { b[1]:.12f}  { b[2]:.12f}  { b[3]:.12f}  " )
-print(f"{ a[0]:.12f}   { a[1]:.12f}  { a[2]:.12f}  { a[3]:.12f}  " )
 
 
 plotSignal(t, s_filt, "Filtered signal.")

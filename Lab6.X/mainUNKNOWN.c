@@ -110,6 +110,18 @@ unsigned int sampleABS() {
     return samples[2];
 }
 
+struct pos {
+    unsigned int x;
+    unsigned int y;
+};
+
+struct state {
+    unsigned int x;
+    unsigned int y;
+    unsigned int ex;
+    unsigned int ey;
+};
+
 struct cornerPos {
     unsigned int x;
     unsigned int y;
@@ -201,6 +213,11 @@ int main() {
     lcd_clear();
 
     int cornerCounter = 0;
+    struct pos setPoint = {.x = 1594, .y = 1433};
+    struct pos currPos = {.x = 0, .y = 0};
+    struct state prevState = {.x = 0, .y = 0, .ex = 0, .ey = 0};   
+    
+    
     struct cornerPos corner0 = {.x = 0, .y = 0};
     struct cornerPos corner1 = {.x = 0, .y = 0};
     struct cornerPos corner2 = {.x = 0, .y = 0};
@@ -209,117 +226,80 @@ int main() {
     SETLED(LED4_PORT);
 
     while (true) {
-        int corner = cornerCounter % 4;
 
-        switch (corner) {
-            case 0:
-                CLEARBIT(TRISDbits.TRISD6);
-                OC7R = 3580;
-                OC7RS = 3580;
-                OC7CONbits.OCM = 0b110;
-                //                SETBIT(T2CONbits.TON);
 
-                CLEARBIT(TRISDbits.TRISD7);
-                OC8R = 3580;
-                OC8RS = 3580;
-                OC8CONbits.OCM = 0b110;
-                //                SETBIT(T2CONbits.TON);
-                break;
 
-            case 1:
-                CLEARBIT(TRISDbits.TRISD6);
-                OC7R = 3800;
-                OC7RS = 3800;
-                OC7CONbits.OCM = 0b110;
-                //                SETBIT(T2CONbits.TON);
+        
+        SETLED(LED1_PORT);
+        t2cycle(50);
+        CLEARLED(LED1_PORT);
+        //        t2cycle(50); 
 
-                CLEARBIT(TRISDbits.TRISD7);
-                OC8R = 3580;
-                OC8RS = 3580;
-                OC8CONbits.OCM = 0b110;
-                //                SETBIT(T2CONbits.TON);
-                break;
+        //        __delay_ms(700);
+        CLEARLED(LED2_PORT);
+        __delay_ms(500);
 
-            case 2:
-                CLEARBIT(TRISDbits.TRISD6);
-                OC7R = 3800;
-                OC7RS = 3800;
-                OC7CONbits.OCM = 0b110;
-                //                SETBIT(T2CONbits.TON);
+        // Sampling
+        switchToXAxis(true);
+        currPos.x = sampleABS();
+        switchToXAxis(false);
+        currPos.y = sampleABS();
+        
 
-                CLEARBIT(TRISDbits.TRISD7);
-                OC8R = 3800;
-                OC8RS = 3800;
-                OC8CONbits.OCM = 0b110;
-                //                SETBIT(T2CONbits.TON);
-                break;
 
-            case 3:
-                CLEARBIT(TRISDbits.TRISD6);
-                OC7R = 3580;
-                OC7RS = 3580;
-                OC7CONbits.OCM = 0b110;
-                //                SETBIT(T2CONbits.TON);
 
-                CLEARBIT(TRISDbits.TRISD7);
-                OC8R = 3800;
-                OC8RS = 3800;
-                OC8CONbits.OCM = 0b110;
-                //                SETBIT(T2CONbits.TON);
-                break;
-        }
-
-        __delay_ms(1850); // not exactly 2 seconds because switching axis adds a 50ms delay, plus other stuff. double check this number before demo!
-
+        // Display
         lcd_clear();
         lcd_locate(0, 0);
-        lcd_printf("C1: X=%04d, Y=%04d %s", corner0.x, corner0.y, corner == 0 ? "<-" : "");
+        lcd_printf("X=%04d, Y=%04d", currPos.x, currPos.y);
         lcd_locate(0, 0);
-        lcd_locate(0, 1);
-        lcd_printf("C2: X=%04d, Y=%04d %s", corner1.x, corner1.y, corner == 1 ? "<-" : "");
-        lcd_locate(0, 1);
-        lcd_locate(0, 2);
-        lcd_printf("C3: X=%04d, Y=%04d %s", corner2.x, corner2.y, corner == 2 ? "<-" : "");
-        lcd_locate(0, 2);
-        lcd_locate(0, 3);
-        lcd_printf("C4: X=%04d, Y=%04d %s", corner3.x, corner3.y, corner == 3 ? "<-" : "");
-        lcd_locate(0, 3);
 
-        switch (corner) {
-            case 0:
-                switchToXAxis(true);
-                corner0.x = sampleABS();
-                switchToXAxis(false);
-                corner0.y = sampleABS();
-                break;
-            case 1:
-                switchToXAxis(true);
-                corner1.x = sampleABS();
-                switchToXAxis(false);
-                corner1.y = sampleABS();
-                break;
-            case 2:
-                switchToXAxis(true);
-                corner2.x = sampleABS();
-                switchToXAxis(false);
-                corner2.y = sampleABS();
-                break;
-            case 3:
-                switchToXAxis(true);
-                corner3.x = sampleABS();
-                switchToXAxis(false);
-                corner3.y = sampleABS();
-                break;
-        }
+        
+        __delay_ms(1850); // not exactly 2 seconds because switching axis adds a 50ms delay, plus other stuff. double check this number before demo!
 
-        // move to corner
+        double kp = 0;
+        double kd = 0;
+
+        // Calculate et and velocity
+        unsigned int dt = 0.2; // Unsure abt this value
+        unsigned int ex = currPos.x - setPoint.x; // e(t)
+        unsigned int ey = currPos.y - setPoint.y;
+        double dex = (double) (ex - prevState.ex) / dt; // Velocity
+        double dey = (double) (ey - prevState.ey) / dt;
+
+        double out_x = -kp * ((double) ex) - kd * dex;
+        double out_y = -kp * ((double) ey) - kd * dey;
+
+        // Save old state
+        prevState.x = currPos.x;
+        prevState.y = currPos.y;
+        prevState.ex = ex;
+        prevState.ey = ey;
+
+        
+        
+        
 
 
 
+        
+        
+                int corner = cornerCounter % 4;
 
+    
+         CLEARBIT(TRISDbits.TRISD6);
+         OC7R = 1;
+         OC7RS = 3820;
+         OC7CONbits.OCM = 0b110;
+                //                SETBIT(T2CONbits.TON);
 
-
-        cornerCounter++;
+//                CLEARBIT(TRISDbits.TRISD7);
+//                OC8R = 1;
+//                OC8RS = 3700;
+//                OC8CONbits.OCM = 0b110;
+                //                SETBIT(T2CONbits.TON);
+ 
+        
 
         // below: buncha crap to 'flush' out the buffer, or whatever
         //        switchToXAxis(true);
