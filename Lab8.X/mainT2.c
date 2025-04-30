@@ -86,7 +86,7 @@ signed int sampleABS() {
     int numSamples = 0;
     signed int samples[5] = {0, 0, 0, 0, 0};
 
-    while (numSamples < 5) {
+    while (numSamples < 1 ) {
 
         // Joystick value sampling code
         SETBIT(AD1CON1bits.SAMP); // start to sample
@@ -95,15 +95,7 @@ signed int sampleABS() {
 
         __delay_ms(1);
 //        CLEARBIT(AD1CON1bits.SAMP);
-       double x_kp = 8.0;
-        double x_kd = 3.5;
-        double x_ki = 0.0 ;
 
-        double y_kp = 1.5;
-        double y_kd = 0.0;
-        double y_ki = 0.0;
-        
-        
         while (!AD1CON1bits.DONE); // wait for conversion to finish
         // reduce risk of ADC sampling
         signed int val = ADC1BUF0;
@@ -115,7 +107,7 @@ signed int sampleABS() {
     // median of samples
 //    qsort(samples, 3, sizeof (signed int), compareInts);
     CLEARLED(LED4_PORT);
-    return samples[2];
+    return samples[0];
 }
 
 struct pos {
@@ -256,7 +248,7 @@ int main() {
     } ;
 
 
-//    SETLED(LED2_PORT);
+    SETLED(LED4_PORT);
 
     signed int x_clipped = 0 , y_clipped = 0,
     out_x = 0 , out_y = 0 /* , ex = 0 , ey = 0  */ ;
@@ -269,7 +261,7 @@ int main() {
 //1.000000000000   0.751546918407  0.483668797629  0.076813259304  
             
 //  CUTOFF 6.3 HZ            
-/*          
+/*           
 #define B0      0.289003621918 
 #define B1      0.867010865753
 #define B2      B1
@@ -280,9 +272,9 @@ int main() {
 #define A1     0.076813259304
 
 #define AZ0     0
-*/
-     
 
+     
+*/
 
 
 // cutoff 2.1
@@ -297,8 +289,8 @@ int main() {
 #define A3     -0.260066588186          
             
 #define AZ0     0.0    
-*/
 
+*/
 
 // cutoff 3.4
             
@@ -311,8 +303,10 @@ int main() {
 #define A2       0.562689163506 
 #define A3     -0.100307595502          
             
-#define AZ0     0.0   
-    
+#define AZ0     0.0    
+
+
+
             
 // cutoff 1.3
 /*            
@@ -404,14 +398,14 @@ int main() {
         else 
             CLEARBIT( LED1_PORT) ;
         
-         for( nowT3 = TMR3 ; (whatT3 = nowT3 - lastT3) < 2000 ; nowT3 = TMR3 ) ;
-         if (2000 < nowT3 - lastT3 ) 
+         for( nowT3 = TMR3 ; (whatT3 = nowT3 - lastT3) < 2500 ; nowT3 = TMR3 ) ;
+         if (2500 < nowT3 - lastT3 ) 
              SETBIT(LED5_PORT);
          
 
          lastT3 = nowT3 ;
         
-//        CLEARLED(LED2_PORT);
+        CLEARLED(LED2_PORT);
 
         // Sampling
         switchToXAxis(true);
@@ -423,7 +417,7 @@ int main() {
         /* ------ Butterworth below here ------  */
   //      bwoff = ( 1 + bwoff ) % 4 ;
         
-        
+        ;
         x_rw[3]=x_rw[2];
         x_rw[2]=x_rw[1];
         x_rw[1]=x_rw[0];
@@ -495,24 +489,15 @@ int main() {
 */        
 
          
-        double x_kp = 8.0;
-        double x_kd = 3.5;
-        double x_ki = 1.0 ;
+        double x_kp = 1.12;
+        double x_kd = 22.4;
+        double x_ki = 16.0 ;
 
-        double y_kp = 1.5;
-        double y_kd = 0.5;
-        double y_ki = 0.3;
+        double y_kp = 1.04;
+        double y_kd = 2.08;
+        double y_ki = 1.6;
         
- /* semi x
-               double x_kp = 8.0;
-        double x_kd = 3.5;
-        double x_ki = 0.0 ;
-
-        double y_kp = 1.5;
-        double y_kd = 0.0;
-        double y_ki = 0.0;
         
-        */
         
         
         /*
@@ -531,7 +516,7 @@ int main() {
 */
 
         
-        double dt = 1 / 25.0 ;
+        double dt = 1 / 20.0 ;
         
         // Error value
         double ex = (currPos.x - setPoint.x) ;
@@ -543,8 +528,8 @@ int main() {
 //        prevState.i_ey += ey * dt;
 
 
-        prevState.i_ex += 0.007 * ( ex - prevState.i_ex ) ;
-        prevState.i_ey += 0.007 * ( ey - prevState.i_ey ) ;
+        prevState.i_ex += 0.02 * ( ex - prevState.i_ex ) ;
+        prevState.i_ey += 0.02 * ( ey - prevState.i_ey ) ;
         
         
         // Velocity value
@@ -572,7 +557,7 @@ int main() {
             
             
             CLEARBIT(TRISDbits.TRISD6);
-            y_clipped =  29372 - 1 * out_y ; 
+            y_clipped =  29382 - 1 * out_y ; 
     //        y_clipped = ( ( 3820 > y_clipped ) ? y_clipped : 3820 ) ;
     //        y_clipped =  ( (3580 < y_clipped ) ? y_clipped : 3580 ) ;
 
@@ -584,7 +569,7 @@ int main() {
   
 
             CLEARBIT(TRISDbits.TRISD7);
-            x_clipped =  29352  -  1 * out_x ; 
+            x_clipped =  29390  -  1 * out_x ; 
     //        x_clipped = ( ( 3820 > x_clipped ) ? x_clipped : 3820 ) ;
     //        x_clipped =  ( (3580 < x_clipped ) ? x_clipped : 3580 ) ;
 
